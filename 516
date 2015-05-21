@@ -1,0 +1,151 @@
+#include "bits/stdc++.h"
+
+#define clr(x) memset((x), 0, sizeof(x))
+#define all(x) (x).begin(), (x).end()
+#define pb push_back
+#define mp make_pair
+#define in(x) int (x); input((x));
+#define x first
+#define y second
+typedef int itn;
+
+#define next next12345
+#define prev prev12345
+#define left lefdsf232
+#define right rig43783
+#define x1 x12345
+#define y1 y12345
+
+using namespace std;
+
+template<typename T>
+T gcd(T x, T y) {
+    while (y > 0) {
+        x %= y;
+        swap(x, y);
+    }
+    return x;
+}
+
+template<class _T>
+inline _T sqr(const _T &x) {
+    return x * x;
+}
+
+template<class _T>
+inline string tostr(const _T &a) {
+    ostringstream os("");
+    os << a;
+    return os.str();
+}
+
+typedef long double ld;
+typedef long long ll;
+typedef unsigned long long ull;
+typedef pair<int, int> PII;
+const long double PI = 3.1415926535897932384626433832795L;
+
+template<typename T>
+inline void input(T &a) {
+    static int ed;
+    a = 0;
+    while (!isdigit(ed = getchar()) && ed != '-') {}
+    char neg = 0;
+    if (ed == '-') {
+        neg = 1;
+        ed = getchar();
+    }
+    while (isdigit(ed)) {
+        a = 10 * a + ed - '0';
+        ed = getchar();
+    }
+    if (neg) a = -a;
+}
+
+template<typename T = int>
+inline T nxt() {
+    T res;
+    input(res);
+    return res;
+}
+
+mt19937 generator;
+
+long long M = 1000000000000ll;
+
+int primes[] = {2, 3, 5};
+
+vector <long long> p;
+
+bool isPrime(long long x) {
+    for (long long i = 2; i * i <= x; ++i) {
+        if (x % i == 0) {
+            return false;
+        }
+    }
+    return true;
+}
+
+void rec(long long cur, int pos) {
+    if (pos == 3) {
+        if (isPrime(cur + 1)) {
+            p.push_back(cur + 1);
+        }
+        return;
+    }
+    for (; cur <= M; cur *= primes[pos]) {
+        rec(cur, pos + 1);
+    }
+}
+
+long long res = 0;
+long long mod = (1ll << 32) - 1;
+
+void rec1(long long cur, int pos) {
+    //cerr << pos << "\n";
+    if (pos == p.size()) {
+        //cerr << cur << "\n";
+        res += cur;
+        res &= mod;
+        return;
+    }
+    if (pos < 3) {
+        rec1(cur, pos + 1);
+        for (cur *= p[pos]; cur <= M; cur *= p[pos]) {
+            rec1(cur, pos + 1);
+        }
+    } else {
+        rec1(cur, pos + 1);
+        double z = 1.0 * cur * p[pos];
+        cur *= p[pos];
+        if (z < M * 10.0 && cur <= M) {
+            rec1(cur, pos + 1);
+        }
+    }
+}
+
+int main() {
+    //#define int long
+#ifdef LOCAL
+    freopen("input.txt", "r", stdin);
+    //freopen("output.txt", "w", stdout);
+#else
+#define fname "race"
+    //freopen(fname".in", "r", stdin);
+    //freopen(fname".out", "w", stdout);
+#endif
+
+    rec(1, 0);
+
+    sort(all(p));
+
+    rec1(1, 0);
+
+    cout << res << "\n";
+
+
+#ifdef LOCAL
+    cerr << "Time elapsed: " << 1.0 * clock() / CLOCKS_PER_SEC * 1000 << " ms." << endl;
+#endif
+    return 0;
+} 
