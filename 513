@@ -1,0 +1,197 @@
+#include "bits/stdc++.h"
+
+#define clr(x) memset((x), 0, sizeof(x))
+#define all(x) (x).begin(), (x).end()
+#define pb push_back
+#define mp make_pair
+#define in(x) int (x); input((x));
+#define x first
+#define y second
+typedef int itn;
+
+#define next next12345
+#define prev prev12345
+#define left lefdsf232
+#define right rig43783
+#define x1 x12345
+#define y1 y12345
+
+using namespace std;
+
+template<typename T>
+T gcd(T x, T y) {
+    while (y > 0) {
+        x %= y;
+        swap(x, y);
+    }
+    return x;
+}
+
+template<class _T>
+inline _T sqr(const _T &x) {
+    return x * x;
+}
+
+template<class _T>
+inline string tostr(const _T &a) {
+    ostringstream os("");
+    os << a;
+    return os.str();
+}
+
+typedef long double ld;
+typedef long long ll;
+typedef unsigned long long ull;
+typedef pair<int, int> PII;
+const long double PI = 3.1415926535897932384626433832795L;
+
+template<typename T>
+inline void input(T &a) {
+    static int ed;
+    a = 0;
+    while (!isdigit(ed = getchar()) && ed != '-') {}
+    char neg = 0;
+    if (ed == '-') {
+        neg = 1;
+        ed = getchar();
+    }
+    while (isdigit(ed)) {
+        a = 10 * a + ed - '0';
+        ed = getchar();
+    }
+    if (neg) a = -a;
+}
+
+template<typename T = int>
+inline T nxt() {
+    T res;
+    input(res);
+    return res;
+}
+
+mt19937 generator;
+
+const int MAXN = 5000000;
+
+long long N;
+
+vector <long long> X[MAXN + 1];
+
+long long solve(long long L, long long R) {
+    cerr << L / 1.0 / 2 / N / N << " " << R / 1.0 / 2 / N / N << "\n";
+
+    long long ans = 0;
+
+    long long minC = sqrt(L / 10.0) + 1;
+    long long maxC = sqrt(R / 2.0) + 1;
+    while (10 * (minC - 1) * (minC - 1) >= L) {
+        --minC;
+    }
+    while (10 * minC * minC < L) {
+        ++minC;
+    }
+    while (2 * (maxC + 1) * (maxC + 1) <= R) {
+        ++maxC;
+    }
+    while (2 * maxC * maxC > R) {
+        --maxC;
+    }
+    maxC = min(maxC, N / 2);
+
+    int iter = 0;
+
+    for (long long c = minC; c <= maxC; ++c) {
+        long long V = sqrtl(max(1ll, L / 2 - c * c)) + 1;
+        while (2 * (c * c + V * V) < L) {
+            ++V;
+        }
+        while (V > 1 && 2 * (c * c + (V - 1) * (V - 1)) >= L) {
+            --V;
+        }
+        long long s = c * c + V * V;
+        for (long long mc = V; 2 * s <= R && mc <= 2 * c; ++mc) {
+            assert(2 * s >= L && 2 * s <= R);
+            X[2 * s - L].push_back(2 * c);
+            s += 2 * mc + 1;
+        }
+    }
+
+    long long minA = sqrtl(L / 2.0) + 1;
+    long long maxA = sqrtl(R) + 1;
+
+    while (2 * (minA - 1) * (minA - 1) >= L) {
+        --minA;
+    }
+    while (2 * minA * minA < L) {
+        ++minA;
+    }
+    while ((maxA + 1) * (maxA + 1) <= R) {
+        ++maxA;
+    }
+    while (maxA * maxA > R) {
+        --maxA;
+    }
+
+    maxA = min(maxA, N);
+
+    //cout << minA << " " << maxA << "\n";
+
+    for (long long a = minA; a <= maxA; ++a) {
+        long long V = sqrtl(max(L - a * a, 1ll)) + 1;
+        while (a * a + V * V < L) {
+            ++V;
+        }
+        while (V > 1 && a * a + (V - 1) * (V - 1) >= L) {
+            --V;
+        }
+        if (V % 2 != a % 2) {
+            ++V;
+        }
+        long long s = a * a + V * V;
+        for (long long b = V; s <= R && b <= a; s += 4 * (b + 1), b += 2) {
+            assert(s >= L && s <= R);
+            vector <long long> & x = X[s - L];
+            ans += lower_bound(all(x), a + b) - lower_bound(all(x), a);
+        }
+    }
+
+    for (long long c = minC; c <= maxC; ++c) {
+        long long V = sqrtl(max(1ll, L / 2 - c * c)) + 1;
+        while (2 * (c * c + V * V) < L) {
+            ++V;
+        }
+        while (V > 1 && 2 * (c * c + (V - 1) * (V - 1)) >= L) {
+            --V;
+        }
+        long long s = c * c + V * V;
+        for (long long mc = V; 2 * s <= R && mc <= 2 * c; ++mc) {
+            X[2 * s - L].pop_back();
+            s += 2 * mc + 1;
+        }
+    }
+
+    return ans;
+}
+
+int main() {
+    //#define int long
+#ifdef LOCAL
+    freopen("input.txt", "r", stdin);
+    //freopen("output.txt", "w", stdout);
+#else
+#define fname "race"
+    //freopen(fname".in", "r", stdin);
+    //freopen(fname".out", "w", stdout);
+#endif
+    N = 100000;
+    long long ans = 0;
+    for (long long i = 1; i <= 2 * N * N; i += MAXN) {
+        ans += solve(i, min(2 * N * N, i + MAXN - 1));
+    }
+    cout << ans << "\n";
+
+#ifdef LOCAL
+    cerr << "Time elapsed: " << 1.0 * clock() / CLOCKS_PER_SEC * 1000 << " ms." << endl;
+#endif
+    return 0;
+} 
