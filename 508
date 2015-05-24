@@ -1,0 +1,186 @@
+#include "bits/stdc++.h"
+
+#define clr(x) memset((x), 0, sizeof(x))
+#define all(x) (x).begin(), (x).end()
+#define pb push_back
+#define mp make_pair
+#define in(x) int (x); input((x));
+#define x first
+#define y second
+typedef int itn;
+
+#define next next12345
+#define prev prev12345
+#define left lefdsf232
+#define right rig43783
+#define x1 x12345
+#define y1 y12345
+
+using namespace std;
+
+template<typename T>
+T gcd(T x, T y) {
+    while (y > 0) {
+        x %= y;
+        swap(x, y);
+    }
+    return x;
+}
+
+template<class _T>
+inline _T sqr(const _T &x) {
+    return x * x;
+}
+
+template<class _T>
+inline string tostr(const _T &a) {
+    ostringstream os("");
+    os << a;
+    return os.str();
+}
+
+typedef long double ld;
+typedef long long ll;
+typedef unsigned long long ull;
+typedef pair<int, int> PII;
+const long double PI = 3.1415926535897932384626433832795L;
+
+template<typename T>
+inline void input(T &a) {
+    static int ed;
+    a = 0;
+    while (!isdigit(ed = getchar()) && ed != '-') {}
+    char neg = 0;
+    if (ed == '-') {
+        neg = 1;
+        ed = getchar();
+    }
+    while (isdigit(ed)) {
+        a = 10 * a + ed - '0';
+        ed = getchar();
+    }
+    if (neg) a = -a;
+}
+
+template<typename T = int>
+inline T nxt() {
+    T res;
+    input(res);
+    return res;
+}
+
+mt19937 generator;
+
+int cnt[100];
+
+
+int get(long long a, long long b) {
+    int res = 0;
+    int v = 0;
+    while (a || b) {
+        long long digit = (a + b) & 1;
+        long long aa = (b - a + digit) >> 1;
+        long long bb = (-a + digit - b) >> 1;
+        //res += (char)('0' + digit);
+        res += digit;
+        //cnt[v++]++;
+        a = aa, b = bb;
+    }
+    return res;
+}
+
+string get3(long long a, long long b) {
+    string res = "";
+    int v = 0;
+    while (a || b) {
+        long long digit = (a + b) & 1;
+        long long aa = (b - a + digit) >> 1;
+        long long bb = (-a + digit - b) >> 1;
+        res += (char)('0' + digit);
+        //res += digit;
+        //cnt[v++]++;
+        a = aa, b = bb;
+    }
+    reverse(all(res));
+    return res;
+}
+
+int get2(long long a, long long b) {
+    return __builtin_popcountll(abs(a - b));
+}
+
+const int V = 127;
+complex<long long> powers[V + 1];
+complex<long long> mul = {-1, 1};
+long long minX[V + 1], maxX[V + 1], minY[V + 1], maxY[V + 1];
+
+long long mod = 1000000007;
+
+typedef tuple<long long, long long, long long, long long> data;
+
+map <data, pair <long long, long long> > res[V];
+
+pair <long long, long long> solve(int pos, long long x1, long long y1, long long x2, long long y2) {
+
+    if (x1 > maxX[pos + 1] || y1 > maxY[pos + 1] || x2 < minX[pos + 1] || y2 < minY[pos + 1]) { return {0ll, 0ll}; };
+
+
+    if (pos == -1) {
+        return {1, 0};
+    }
+    x1 = max(x1, minX[pos + 1]);
+    x2 = min(x2, maxX[pos + 1]);
+    y1 = max(y1, minY[pos + 1]);
+    y2 = min(y2, maxY[pos + 1]);
+
+    data X = make_tuple(x1, y1, x2, y2);
+
+    if (res[pos].count(X)) {
+        return res[pos][X];
+    }
+
+    pair <long long, long long> & ans = res[pos][X];
+
+    auto z1 = solve(pos - 1, x1, y1, x2, y2);
+    auto z2 = solve(pos - 1, x1 - powers[pos].real(), y1 - powers[pos].imag(), x2 - powers[pos].real(), y2 - powers[pos].imag());
+
+    ans.first = (z1.first + z2.first) % mod;
+    ans.second = (z1.second + z2.second + z2.first) % mod;
+
+    return ans;
+}
+
+int main() {
+    //#define int long
+#ifdef LOCAL
+    freopen("input.txt", "r", stdin);
+    //freopen("output.txt", "w", stdout);
+#else
+#define fname "race"
+    //freopen(fname".in", "r", stdin);
+    //freopen(fname".out", "w", stdout);
+#endif
+
+    const long long N = 1000000000000000;
+
+    powers[0] = {1, 0};
+
+    for (int i = 0; i < V; ++i) {
+        powers[i + 1] = powers[i] * mul;
+    }
+
+    for (int i = 0; i < V; ++i) {
+        minX[i + 1] = min(minX[i], minX[i] + powers[i].real());
+        maxX[i + 1] = max(maxX[i], maxX[i] + powers[i].real());
+
+        minY[i + 1] = min(minY[i], minY[i] + powers[i].imag());
+        maxY[i + 1] = max(maxY[i], maxY[i] + powers[i].imag());
+    }
+
+    cout << solve(V - 1, -N, -N, N, N).y << "\n";
+
+#ifdef LOCAL
+    cerr << "Time elapsed: " << 1.0 * clock() / CLOCKS_PER_SEC * 1000 << " ms." << endl;
+#endif
+    return 0;
+} 
