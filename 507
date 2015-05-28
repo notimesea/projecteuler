@@ -1,0 +1,340 @@
+import java.awt.geom.Area;
+import java.awt.geom.Path2D;
+import java.awt.geom.PathIterator;
+import java.io.*;
+import java.math.BigInteger;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
+
+/**
+ * Hello world!
+ *
+ */
+
+public class Main {
+
+    public static void main(String[] args) throws Exception {
+        boolean home = true;
+        final InputReader in = !home ? new InputReader(new FileInputStream("origami.in")) : new InputReader(System.in);
+        final PrintWriter out = !home ? new PrintWriter(new FileOutputStream("origami.out")) : new PrintWriter(System.out);
+        new Solution().solve(in, out);
+        out.close();
+//        Thread thread = new Thread(null, new Runnable() {
+//            @Override
+//            public void run() {
+//                new Solution().solve(in, out);
+//                out.close();
+//            }
+//        }, "", 1 << 23);
+        //thread.start();
+    }
+}
+
+class Solution {
+    BigInteger [] gcd (BigInteger a, BigInteger b) {
+        BigInteger x = BigInteger.ZERO;
+        BigInteger y = BigInteger.ONE;
+        BigInteger u = BigInteger.ONE;
+        BigInteger v = BigInteger.ZERO;
+        //x,y, u,v = 0,1, 1,0
+        while (a.signum() != 0) {
+            BigInteger [] t = b.divideAndRemainder(a);
+            BigInteger m = x.subtract(u.multiply(t[0]));
+            BigInteger n = y.subtract(v.multiply(t[0]));
+            b = a; a = t[1]; x = u; y = v; u = m; v = n;
+        }
+        return new BigInteger[]{b, x, y};
+    }
+
+    //Library/Java/JavaVirtualMachines/jdk1.8.0_05.jdk/Contents/Home/bin/java -agentlib:jdwp=transport=dt_socket,address=127.0.0.1:49622,suspend=y,server=n -Dfile.encoding=UTF-8 -classpath "/Library/Java/JavaVirtualMachines/jdk1.8.0_05.jdk/Contents/Home/lib/ant-javafx.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_05.jdk/Contents/Home/lib/dt.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_05.jdk/Contents/Home/lib/javafx-mx.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_05.jdk/Contents/Home/lib/jconsole.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_05.jdk/Contents/Home/lib/sa-jdi.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_05.jdk/Contents/Home/lib/tools.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_05.jdk/Contents/Home/jre/lib/charsets.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_05.jdk/Contents/Home/jre/lib/deploy.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_05.jdk/Contents/Home/jre/lib/htmlconverter.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_05.jdk/Contents/Home/jre/lib/javaws.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_05.jdk/Contents/Home/jre/lib/jce.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_05.jdk/Contents/Home/jre/lib/jfr.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_05.jdk/Contents/Home/jre/lib/jfxswt.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_05.jdk/Contents/Home/jre/lib/jsse.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_05.jdk/Contents/Home/jre/lib/management-agent.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_05.jdk/Contents/Home/jre/lib/plugin.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_05.jdk/Contents/Home/jre/lib/resources.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_05.jdk/Contents/Home/jre/lib/rt.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_05.jdk/Contents/Home/jre/lib/ext/cldrdata.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_05.jdk/Contents/Home/jre/lib/ext/dnsns.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_05.jdk/Contents/Home/jre/lib/ext/jfxrt.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_05.jdk/Contents/Home/jre/lib/ext/localedata.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_05.jdk/Contents/Home/jre/lib/ext/nashorn.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_05.jdk/Contents/Home/jre/lib/ext/sunec.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_05.jdk/Contents/Home/jre/lib/ext/sunjce_provider.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_05.jdk/Contents/Home/jre/lib/ext/sunpkcs11.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_05.jdk/Contents/Home/jre/lib/ext/zipfs.jar:/Users/evgeny/prog/hadoop-common/my-app/target/classes:/Users/evgeny/.m2/repository/junit/junit-dep/4.8.2/junit-dep-4.8.2.jar:/Users/evgeny/.m2/repository/org/hamcrest/hamcrest-core/1.1/hamcrest-core-1.1.jar:/Applications/IntelliJ IDEA 14.app/Contents/lib/idea_rt.jar" Main
+
+
+
+    BigInteger find(BigInteger nom1, BigInteger denom1, BigInteger nom2, BigInteger denom2) {
+        BigInteger a = BigInteger.ONE;
+        BigInteger b = BigInteger.ZERO;
+
+        while (true) {
+            BigInteger [] U = nom1.divideAndRemainder(denom1);
+            BigInteger [] V = nom2.divideAndRemainder(denom2);
+
+            if (!U[1].equals(BigInteger.ZERO)) {
+                U[0] = U[0].add(BigInteger.ONE);
+            }
+
+            if (V[0].compareTo(U[0]) >= 0) {
+                return a.add(U[0].multiply(b));
+            }
+
+            BigInteger q = V[0];
+
+            BigInteger e = b;
+            b = a.add(q.multiply(b));
+            a = e;
+
+
+            nom2 = denom1;
+            nom1 = denom2;
+            denom1 = V[1];
+            denom2 = U[1];
+        }
+    }
+
+    Random random = new Random(734853);
+    int maxStress = 1000;
+
+    void stress(int tests) {
+
+        for (int test = 0; test < tests; ++test) {
+            int a, b, c, d;
+            do {
+                a = random.nextInt(maxStress) + 1;
+                b = random.nextInt(maxStress) + 1;
+
+                c = random.nextInt(maxStress) + 1;
+                d = random.nextInt(maxStress) + 1;
+            } while (a * d > b * c);
+
+            int ans = find(BigInteger.valueOf(a), BigInteger.valueOf(b), BigInteger.valueOf(c), BigInteger.valueOf(d)).intValue();
+            int ans2;
+            for (int x = 1; ; ++x) {
+                int l = (a * x + b - 1) / b;
+                int r = (c * x) / d;
+                if (l <= r) {
+                    ans2 = x;
+                    break;
+                }
+            }
+            if (ans != ans2) {
+                System.out.println(a + "/" + b);
+                System.out.println(c + "/" + d);
+                System.out.println(ans);
+                System.out.println(ans2);
+                throw new AssertionError();
+            }
+        }
+    }
+
+
+    void solve(InputReader in, PrintWriter out) {
+        int n = 20 * 1000 * 1000;
+
+        //stress(1000);
+
+        long modulo = 10000000;
+
+        int [] t = new int[12 * (n + 1)];
+        long [] A = new long[3];
+        long [] B = new long[3];
+        BigInteger [] a = new BigInteger[3];
+        BigInteger [] b = new BigInteger[3];
+        BigInteger [] na = new BigInteger[3];
+        BigInteger [] nb = new BigInteger[3];
+
+        t[2] = 1;
+
+        for (int i = 3; i < 12 * (n + 1); ++i) {
+            t[i] = t[i - 1] + t[i - 2] + t[i - 3];
+            while (t[i] >= modulo) {
+                t[i] -= modulo;
+            }
+        }
+
+        BigInteger answer = BigInteger.ZERO;
+
+        for (int i = 1; i <= n; ++i) {
+            if (i % 100000 == 0) {
+                System.out.println("i = " + i);
+            }
+            for (int j = 0; j < 3; ++j) {
+                if (j == 0) {
+                    A[j] = t[12 * i - 12 + 2 * j + 1] - t[12 * i - 12 + 2 * j + 2];
+                } else if (j == 1) {
+                    A[j] = t[12 * i - 12 + 2 * j + 1] + t[12 * i - 12 + 2 * j + 2];
+                } else {
+                    A[j] = (long)t[12 * i - 12 + 2 * j + 1] * t[12 * i - 12 + 2 * j + 2];
+                }
+            }
+
+            for (int j = 0; j < 3; ++j) {
+                if (j == 0) {
+                    B[j] = t[12 * i - 6 + 2 * j + 1] - t[12 * i - 6 + 2 * j + 2];
+                } else if (j == 1) {
+                    B[j] = t[12 * i - 6 + 2 * j + 1] + t[12 * i - 6 + 2 * j + 2];
+                } else {
+                    B[j] = (long)t[12 * i - 6 + 2 * j + 1] * t[12 * i - 6 + 2 * j + 2];
+                }
+            }
+
+            BigInteger res = BigInteger.valueOf(Long.MAX_VALUE);
+
+            for (int mask = 0; mask < 4; ++mask) {
+                BigInteger c = BigInteger.ZERO;
+                BigInteger d = BigInteger.ZERO;
+                for (int j = 0; j < 3; ++j) {
+                    if ((mask & (1 << j)) != 0) {
+                        a[j] = BigInteger.valueOf(A[j]);
+                        b[j] = BigInteger.valueOf(B[j]);
+                    } else {
+                        a[j] = BigInteger.valueOf(-A[j]);
+                        b[j] = BigInteger.valueOf(-B[j]);
+                    }
+                    c = c.add(a[j]);
+                    d = d.add(b[j]);
+                }
+
+                boolean ok = false;
+
+                for (int j = 0; j < 3 && !ok; ++j) {
+                    BigInteger xx = b[j].negate();
+                    BigInteger yy = a[j];
+                    boolean r = true;
+                    for (int k = 0; k < 3; ++k) {
+                        BigInteger T = a[k].multiply(xx).add(b[k].multiply(yy));
+                        if (T.signum() < 0) {
+                            r = false;
+                            break;
+                        }
+                    }
+                    if ((xx.signum() != 0 || yy.signum() != 0) && r)
+                        ok = true;
+
+                    xx = b[j];
+                    yy = a[j].negate();
+                    r = true;
+
+                    for (int k = 0; k < 3; ++k) {
+                        BigInteger T = a[k].multiply(xx).add(b[k].multiply(yy));
+                        if (T.signum() < 0) {
+                            r = false;
+                            break;
+                        }
+                    }
+                    if ((xx.signum() != 0 || yy.signum() != 0) && r)
+                        ok = true;
+                }
+
+
+                if (ok) {
+
+                    BigInteger [] T = gcd(c.abs(), d.abs());
+
+                    //System.err.println(c + " " + d);
+                    //System.err.println(Arrays.toString(T));
+
+                    BigInteger g = T[0];
+                    BigInteger x = T[1];
+                    BigInteger y = T[2];
+
+                    if (c.signum() < 0) x = x.negate();
+                    if (d.signum() < 0) y = y.negate();
+
+                    c = c.divide(g);
+                    d = d.divide(g);
+
+                    if (!c.multiply(x).add(d.multiply(y)).equals(BigInteger.ONE)) {
+                        throw new AssertionError();
+                    }
+
+                    boolean [] sign = new boolean[3];
+
+                    for (int j = 0; j < 3; ++j) {
+                        na[j] = a[j].multiply(x).add(b[j].multiply(y));
+
+                        nb[j] = a[j].multiply(d).subtract(b[j].multiply(c));
+
+                        sign[j] = false;
+
+                        if (nb[j].signum() < 0 || (nb[j].signum() == 0 && na[j].signum() < 0)) {
+                            na[j] = na[j].negate();
+                            nb[j] = nb[j].negate();
+                            sign[j] = true;
+                        }
+                    }
+
+                    BigInteger minA = BigInteger.valueOf(Long.MAX_VALUE), minB = BigInteger.ONE;
+                    BigInteger maxA = BigInteger.valueOf(Long.MIN_VALUE), maxB = BigInteger.ONE;
+
+
+                    for (int j = 0; j < 3; ++j) {
+                        if (na[j].signum() == 0 && nb[j].signum() == 0)
+                            continue;
+                        if (sign[j]) {
+                            if (na[j].multiply(minB).add(nb[j].multiply(minA)).signum() > 0) {
+                                minA = na[j].negate();
+                                minB = nb[j];
+                            }
+                        } else {
+                            if (na[j].multiply(maxB).add(nb[j].multiply(maxA)).signum() < 0) {
+                                maxA = na[j].negate();
+                                maxB = nb[j];
+                            }
+                        }
+                    }
+
+                    //System.err.println(minA.doubleValue() / minB.doubleValue() + " " + maxA.doubleValue() / maxB.doubleValue());
+
+                    if (minA.multiply(maxB).compareTo(maxA.multiply(minB)) < 0) {
+                        throw new AssertionError();
+                    }
+
+
+
+                    if (minA.signum() >= 0 && maxA.signum() <= 0) {
+                        if (res.compareTo(g) > 0) {
+                            res = g;
+                        }
+                    } else {
+                        if (minA.signum() < 0) {
+                            BigInteger e = minA;
+                            minA = maxA;
+                            maxA = e;
+                            minA = minA.negate();
+                            maxA = maxA.negate();
+
+                            e = minB;
+                            minB = maxB;
+                            maxB = e;
+                        }
+                        BigInteger X = find(maxA, maxB, minA, minB).multiply(g);
+
+                        if (res.compareTo(X) > 0) {
+                            res = X;
+                        }
+                    }
+                }
+            }
+            //System.err.println(i + " " + res);
+            answer = answer.add(res);
+        }
+        System.out.println(answer);
+    }
+}
+
+class InputReader {
+    public BufferedReader reader;
+    public StringTokenizer tokenizer;
+
+    public InputReader(InputStream stream) {
+        reader = new BufferedReader(new InputStreamReader(stream), 32768);
+        tokenizer = null;
+    }
+
+    public String next() {
+        while (tokenizer == null || !tokenizer.hasMoreTokens()) {
+            try {
+                tokenizer = new StringTokenizer(reader.readLine());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return tokenizer.nextToken();
+    }
+
+    public int nextInt() {
+        return Integer.parseInt(next());
+    }
+
+}
+
