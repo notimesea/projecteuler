@@ -1,0 +1,249 @@
+#include <bits/stdc++.h>
+
+#define clr(x) memset((x), 0, sizeof(x))
+#define all(x) (x).begin(), (x).end()
+#define pb push_back
+#define mp make_pair
+#define in(x) int (x); input((x));
+#define x first
+#define y second
+typedef int itn;
+
+#define next next12345
+#define prev prev12345
+#define left lefdsf232
+#define right rig43783
+#define x1 x12345
+#define y1 y12345
+
+using namespace std;
+
+template<typename T>
+T gcd(T x, T y) {
+    while (y > 0) {
+        x %= y;
+        swap(x, y);
+    }
+    return x;
+}
+
+template<class _T>
+inline _T sqr(const _T &x) {
+    return x * x;
+}
+
+template<class _T>
+inline string tostr(const _T &a) {
+    ostringstream os("");
+    os << a;
+    return os.str();
+}
+
+typedef long double ld;
+typedef long long ll;
+typedef unsigned long long ull;
+typedef pair<int, int> PII;
+const long double PI = 3.1415926535897932384626433832795L;
+
+template<typename T>
+inline void input(T &a) {
+    static int ed;
+    a = 0;
+    while (!isdigit(ed = getchar()) && ed != '-') { }
+    char neg = 0;
+    if (ed == '-') {
+        neg = 1;
+        ed = getchar();
+    }
+    while (isdigit(ed)) {
+        a = 10 * a + ed - '0';
+        ed = getchar();
+    }
+    if (neg) a = -a;
+}
+
+template<typename T = int>
+inline T nxt() {
+    T res;
+    input(res);
+    return res;
+}
+
+mt19937 generator;
+
+long long mod = (1ll << 60) - 1;
+
+string bin(long long x) {
+    string res = "";
+    while (x) {
+        if (x & 1ll) {
+            res += "1";
+        } else {
+            res += "0";
+        }
+        x >>= 1;
+    }
+    return res;
+}
+
+long long f[63];
+
+long long solve(long long x) {
+    if (x == 0) {
+        return 0;
+    }
+    int d = 63 - __builtin_clzll(x);
+    f[d] = 1;
+    f[d + 1] = 0;
+    for (int i = d - 1; i >= 0; --i) {
+        if ((x >> i) & 1ll) {
+            f[i] = (2 * f[i + 1] + 3 * f[i + 2]) & mod;
+        } else {
+            f[i] = (3 * f[i + 1] + 2 * f[i + 2]) & mod;
+        }
+    }
+    return f[0];
+}
+
+
+const int d = 7;
+long long res[1 << (d + 1)];
+
+inline long long FMAX(const long long &x, const long long &y) {
+    return x - (((x - y) >> 63) & (x - y));
+}
+
+void fnd(long long x, long long n) {
+    long long q = 1ll << 60;
+
+    long long st[150];
+    int po[150];
+    long long ma[150];
+
+    ma[1] = 0;
+
+    long long pr[100];
+
+    int sz = 0;
+
+    pr[0] = solve(x >> 1);
+    pr[1] = solve(x);
+    ma[1] = 0;
+
+    st[sz++] = 2 * x;
+    po[sz - 1] = 2;
+
+    st[sz++] = 2 * x + 1;
+    po[sz - 1] = 2;
+
+    while (sz) {
+        long long v = st[--sz];
+
+        int pos = po[sz];
+
+        if ((n - v) >> 63) {
+            pr[pos] = (((pr[pos - 1] + pr[pos - 2]) * 2) + pr[pos - 1 - (v % 2ll)]) & mod;
+            ma[pos - 1] = FMAX(ma[pos - 1], pr[pos]);
+            continue;
+        }
+
+        if (!(v & q)) {
+            po[sz] = pos;
+            st[sz++] = -1;
+
+            ma[pos] = 0;
+            pr[pos] = (((pr[pos - 1] + pr[pos - 2]) * 2) + pr[pos - 1 - (v % 2ll)]) & mod;
+
+            po[sz] = pos + 1;
+            st[sz++] = (v << 1) ^ 1;
+
+            po[sz] = pos + 1;
+            st[sz++] = (v << 1);
+        } else {
+            ma[pos] ^= mod;
+            ma[pos - 1] = FMAX(ma[pos - 1], ma[pos]);
+        }
+    }
+
+    res[x] = ma[1] ^ mod;
+}
+
+
+
+int main() {
+    //#define int long
+#ifdef LOCAL
+    freopen("input.txt", "r", stdin);
+    //freopen("output.txt", "w", stdout);
+#else
+#define fname "race"
+    //freopen(fname".in", "r", stdin);
+    //freopen(fname".out", "w", stdout);
+#endif
+
+    auto start = std::chrono::high_resolution_clock::now();
+
+    thread threads[1 << (d + 1)];
+
+    long long n = 1000000000000ll - 1;
+
+    for (int k = (1 << d); k < (1 << (d + 1)); ++k) {
+        threads[k] = thread(fnd, 1ll * k, n);
+    }
+    for (int k = (1 << d); k < (1 << (d + 1)); ++k) {
+        threads[k].join();
+    }
+
+
+    for (int i = (1 << d) - 1; i >= 1; --i) {
+        res[i] = mod ^ max(res[i + i], res[i + i + 1]);
+    }
+
+    cout << res[1] << "\n";
+
+    auto finish = std::chrono::high_resolution_clock::now();
+
+    std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(finish-start).count() << "ms\n";
+
+//    x[0] = 0, x[1] = 1;
+//
+//    for (int i = 2; i < N; ++i) {
+//        if (i & 1) {
+//            x[i] = (2 * x[i >> 1] + 3 * x[i >> 2]) & mod;
+//        } else {
+//            x[i] = (3 * x[i >> 1] + 2 * x[i >> 2]) & mod;
+//        }
+//    }
+//
+//    for (int i = N - 1; i >= 1; --i) {
+//        int u = 2 * i;
+//        y[i] = 0;
+//        if (u < N) {
+//            y[i] = max(y[i], y[u]);
+//        } else {
+//            y[i] = max(y[i], solve(u));
+//        }
+//
+//        u = 2 * i + 1;
+//
+//        if (u < N) {
+//            y[i] = max(y[i], y[u]);
+//        } else {
+//            y[i] = max(y[i], solve(u));
+//        }
+//        y[i] ^= mod;
+//    }
+//
+//    cout << (y[2] ^ mod) << "\n";
+//    cout << (y[3] ^ mod) << "\n";
+
+
+//    for (int i = 0; i < N; ++i) {
+//        cout << i << " " << bin(solve(i)) << "\n";
+//    }
+
+#ifdef LOCAL
+    cerr << "Time elapsed: " << 1.0 * clock() / CLOCKS_PER_SEC * 1000 << " ms." << endl;
+#endif
+    return 0;
+} 
