@@ -1,0 +1,139 @@
+#include <bits/stdc++.h>
+
+#define clr(x) memset((x), 0, sizeof(x))
+#define all(x) (x).begin(), (x).end()
+#define pb push_back
+#define mp make_pair
+#define in(x) int (x); input((x));
+#define x first
+#define y second
+typedef int itn;
+
+#define next next12345
+#define prev prev12345
+#define left lefdsf232
+#define right rig43783
+#define x1 x12345
+#define y1 y12345
+
+using namespace std;
+
+template<typename T>
+T gcd(T x, T y) {
+    while (y > 0) {
+        x %= y;
+        swap(x, y);
+    }
+    return x;
+}
+
+template<class _T>
+inline _T sqr(const _T &x) {
+    return x * x;
+}
+
+template<class _T>
+inline string tostr(const _T &a) {
+    ostringstream os("");
+    os << a;
+    return os.str();
+}
+
+typedef long double ld;
+typedef long long ll;
+typedef unsigned long long ull;
+typedef pair<int, int> PII;
+const long double PI = 3.1415926535897932384626433832795L;
+
+template<typename T>
+inline void input(T &a) {
+    static int ed;
+    a = 0;
+    while (!isdigit(ed = getchar()) && ed != '-') { }
+    char neg = 0;
+    if (ed == '-') {
+        neg = 1;
+        ed = getchar();
+    }
+    while (isdigit(ed)) {
+        a = 10 * a + ed - '0';
+        ed = getchar();
+    }
+    if (neg) a = -a;
+}
+
+template<typename T = int>
+inline T nxt() {
+    T res;
+    input(res);
+    return res;
+}
+
+mt19937 generator;
+
+
+int main() {
+    //#define int long
+#ifdef LOCAL
+    freopen("input.txt", "r", stdin);
+    //freopen("output.txt", "w", stdout);
+#else
+#define fname "race"
+    //freopen(fname".in", "r", stdin);
+    //freopen(fname".out", "w", stdout);
+#endif
+
+    auto start = std::chrono::high_resolution_clock::now();
+
+    int N = 100;
+
+    int ans = 0;
+
+    int sq[N * N * 4 + 1];
+
+    clr(sq);
+
+    for (int i = 0; i <= 2 * N; ++i) {
+        sq[i * i] = 1;
+    }
+
+    for (int a = 1; a <= N; ++a) {
+        for (int b = 1; b <= N; ++b) {
+            int g1 = gcd(a, b);
+            int s1 = a * b;
+            for (int c = 1; c <= N; ++c) {
+                int g2 = gcd(b, c);
+                int s2 = b * c;
+                for (int d = 1; d <= N; ++d) {
+                    int g3 = gcd(c, d);
+                    int s3 = d * c;
+
+                    int g4 = gcd(a, d);
+                    int s4 = a * d;
+
+                    int ss = s1 + s2 + s3 + s4;
+
+                    int gg = g1 + g2 + g3 + g4;
+
+                    int cnt = (ss + 2 - gg) / 2 ;
+
+                    if (sq[cnt]) {
+                        ++ans;
+                    }
+                }
+            }
+        }
+    }
+
+    cout << ans << "\n";
+
+    auto finish = std::chrono::high_resolution_clock::now();
+
+    std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(finish-start).count() << "ms\n";
+
+
+#ifdef LOCAL
+    cerr << "Time elapsed: " << 1.0 * clock() / CLOCKS_PER_SEC * 1000 << " ms." << endl;
+#endif
+    return 0;
+} 
