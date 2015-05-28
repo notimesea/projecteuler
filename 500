@@ -1,0 +1,156 @@
+#include <bits/stdc++.h>
+
+#define clr(x) memset((x), 0, sizeof(x))
+#define all(x) (x).begin(), (x).end()
+#define pb push_back
+#define mp make_pair
+#define in(x) int (x); input((x));
+#define x first
+#define y second
+typedef int itn;
+
+#define next next12345
+#define prev prev12345
+#define left lefdsf232
+#define right rig43783
+#define x1 x12345
+#define y1 y12345
+
+using namespace std;
+
+template<typename T>
+T gcd(T x, T y) {
+    while (y > 0) {
+        x %= y;
+        swap(x, y);
+    }
+    return x;
+}
+
+template<class _T>
+inline _T sqr(const _T &x) {
+    return x * x;
+}
+
+template<class _T>
+inline string tostr(const _T &a) {
+    ostringstream os("");
+    os << a;
+    return os.str();
+}
+
+typedef long double ld;
+typedef long long ll;
+typedef unsigned long long ull;
+typedef pair<int, int> PII;
+const long double PI = 3.1415926535897932384626433832795L;
+
+template<typename T>
+inline void input(T &a) {
+    static int ed;
+    a = 0;
+    while (!isdigit(ed = getchar()) && ed != '-') { }
+    char neg = 0;
+    if (ed == '-') {
+        neg = 1;
+        ed = getchar();
+    }
+    while (isdigit(ed)) {
+        a = 10 * a + ed - '0';
+        ed = getchar();
+    }
+    if (neg) a = -a;
+}
+
+template<typename T = int>
+inline T nxt() {
+    T res;
+    input(res);
+    return res;
+}
+
+mt19937 generator;
+
+typedef vector <vector <long long> > matrix;
+
+const int N = 10000000;
+
+long long mod = 500500507;
+
+int lp[N + 1];
+
+vector <long long> primes;
+
+int main() {
+    //#define int long
+#ifdef LOCAL
+    freopen("input.txt", "r", stdin);
+    //freopen("output.txt", "w", stdout);
+#else
+#define fname "race"
+    //freopen(fname".in", "r", stdin);
+    //freopen(fname".out", "w", stdout);
+#endif
+
+    auto start = std::chrono::high_resolution_clock::now();
+
+    for (int i = 2; i <= N; ++i) {
+        if (!lp[i]) {
+            primes.push_back(i);
+            for (int j = i + i; j <= N; j += i) {
+                lp[j] = 1;
+            }
+        }
+    }
+
+    int need = 500500;
+
+    priority_queue<long long> ans;
+
+    for (int d = 0; ; ++d) {
+        int c = 0;
+        for (long long p : primes) {
+            long long x = 1;
+            long double xx = 1;
+            for (int j = 0; j < (1 << d); ++j) {
+                x *= p;
+                xx *= p;
+            }
+            if (xx > 1e19) {
+                break;
+            }
+            if (ans.size() < need) {
+                ans.push(x);
+            } else {
+                if (ans.top() < x) {
+                    break;
+                } else {
+                    ans.pop();
+                    ans.push(x);
+                }
+            }
+            ++c;
+        }
+        if (!c) break;
+    }
+
+    long long res = 1;
+
+
+    while (!ans.empty()) {
+        res = ans.top() * res % mod;
+        ans.pop();
+    }
+
+    cout << res << "\n";
+
+    auto finish = std::chrono::high_resolution_clock::now();
+
+    std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(finish-start).count() << "ms\n";
+
+
+#ifdef LOCAL
+    cerr << "Time elapsed: " << 1.0 * clock() / CLOCKS_PER_SEC * 1000 << " ms." << endl;
+#endif
+    return 0;
+} 
