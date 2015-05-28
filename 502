@@ -1,0 +1,358 @@
+#include <bits/stdc++.h>
+
+#define clr(x) memset((x), 0, sizeof(x))
+#define all(x) (x).begin(), (x).end()
+#define pb push_back
+#define mp make_pair
+#define in(x) int (x); input((x));
+#define x first
+#define y second
+typedef int itn;
+
+#define next next12345
+#define prev prev12345
+#define left lefdsf232
+#define right rig43783
+#define x1 x12345
+#define y1 y12345
+
+using namespace std;
+
+template<typename T>
+T gcd(T x, T y) {
+    while (y > 0) {
+        x %= y;
+        swap(x, y);
+    }
+    return x;
+}
+
+template<class _T>
+inline _T sqr(const _T &x) {
+    return x * x;
+}
+
+template<class _T>
+inline string tostr(const _T &a) {
+    ostringstream os("");
+    os << a;
+    return os.str();
+}
+
+typedef long double ld;
+typedef long long ll;
+typedef unsigned long long ull;
+typedef pair<int, int> PII;
+const long double PI = 3.1415926535897932384626433832795L;
+
+template<typename T>
+inline void input(T &a) {
+    static int ed;
+    a = 0;
+    while (!isdigit(ed = getchar()) && ed != '-') { }
+    char neg = 0;
+    if (ed == '-') {
+        neg = 1;
+        ed = getchar();
+    }
+    while (isdigit(ed)) {
+        a = 10 * a + ed - '0';
+        ed = getchar();
+    }
+    if (neg) a = -a;
+}
+
+template<typename T = int>
+inline T nxt() {
+    T res;
+    input(res);
+    return res;
+}
+
+mt19937 generator;
+
+typedef vector <vector <long long> > matrix;
+
+long long mod = 1000000007;
+
+matrix operator*(const matrix &l, const matrix &r) {
+    int n = l.size();
+    matrix res(n, vector <long long>(n));
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < n; ++j) {
+            for (int k = 0; k < n; ++k) {
+                res[i][j] += l[i][k] * r[k][j];
+                res[i][j] %= mod;
+            }
+        }
+    }
+    return res;
+}
+
+matrix pw(matrix A, long long n) {
+    --n;
+    matrix res = A;
+    while (n) {
+        if (n & 1ll) {
+            res = res * A;
+        }
+        A = A * A;
+        n >>= 1;
+    }
+    return res;
+}
+
+matrix get(long long h) {
+    matrix res(2 * (h + 1), vector <long long>(2 * (h + 1)));
+
+    for (int x = 0; x <= h; ++x) {
+        for (int parity = 0; parity < 2; ++parity) {
+            int state = x * 2 + parity;
+            for (int next = 0; next <= h; ++next) {
+                if (next >= x) {
+                    int nparity = (parity) ^ ((next - x) & 1);
+                    int nstate = next * 2 + nparity;
+                    res[nstate][state]++;
+                } else {
+                    int nstate = next * 2 + parity;
+                    res[nstate][state]++;
+                }
+            }
+        }
+    }
+    return res;
+}
+
+long long solve1(long long w, long long h) {
+    if (h == 0) {
+        return 0;
+    }
+    if (h == 1) {
+        return 0;
+    }
+    --h;
+    matrix A = get(h);
+    A = pw(A, w + 1);
+
+    long long res = A[1][0];
+
+    matrix B = get(h - 1);
+
+    B = pw(B, w + 1);
+
+    long long res2 = B[1][0];
+
+    return (res - res2 + mod) % mod;
+}
+
+void md(long long &x) {
+    while (x >= mod) {
+        x -= mod;
+    }
+}
+
+long long solve22(long long w, long long h) {
+    if (h < 2) {
+        return 0;
+    }
+    --h;
+    long long dp[h + 1][2][2];
+    clr(dp);
+    dp[0][0][0] = 1;
+    for (int i = 0; i <= w; ++i) {
+        for (int j = 1; j <= h; ++j) {
+            for (int k = 0; k < 2; ++k) {
+                for (int l = 0; l < 2; ++l) {
+                    dp[j][k][l] += dp[j - 1][k][l];
+                    md(dp[j][k][l]);
+                }
+
+            }
+        }
+        long long tmp[h + 1][2][2];
+        clr(tmp);
+        for (int j = 0; j <= h; ++j) {
+            for (int k = 0; k < 2; ++k) {
+                for (int prev = 0; prev < 2; ++prev) {
+
+                    tmp[j][k ^ (j & 1) ^ prev][j & 1] += dp[j][k][prev];
+                    md(tmp[j][k ^ (j & 1) ^ prev][j & 1]);
+
+                    tmp[j][k][j & 1] += dp[h][k][prev] - dp[j][k][prev] + mod;
+                    md(tmp[j][k][j & 1]);
+                }
+
+            }
+        }
+        memcpy(dp, tmp, sizeof(dp));
+    }
+    return dp[0][1][0];
+}
+
+long long solve2(long long w, long long h) {
+    return (solve22(w, h) - solve22(w, h - 1) + mod) % mod;
+}
+
+long long pw(long long a, long long n) {
+    long long res = 1;
+    while (n) {
+        if (n & 1ll) {
+            res = res * a % mod;
+        }
+        a = a * a % mod;
+        n >>= 1;
+    }
+    return res;
+}
+
+long long inv(long long a) {
+    return pw(a, mod - 2);
+}
+
+void gauss(vector < vector <long long> > a, vector <long long> & ans) {
+    int n = (int)a.size();
+
+    int row = 0;
+
+    for (int i = 0; i < n; ++i) {
+        int k = -1;
+        for (int j = row; j < n; ++j) {
+            if (a[j][i]) {
+                k = j;
+                break;
+            }
+        }
+        assert(k != -1);
+        swap(a[row], a[k]);
+
+        assert(a[row][i]);
+
+        assert(a[row][i] >= 0);
+
+        long long t = inv(a[row][i]);
+
+        for (int j = 0; j < n + 1; ++j) {
+            a[row][j] = a[row][j] * t % mod;
+        }
+
+        assert(a[row][i] == 1);
+
+        for (int j = 0; j < n; ++j) {
+            if (j == row) continue;
+            if (a[j][i]) {
+                long long mul = a[j][i];
+                for (int p = 0; p < n + 1; ++p) {
+                    a[j][p] = (a[j][p] - mul * a[row][p] % mod + mod) % mod;
+                }
+                assert(!a[j][i]);
+            }
+        }
+        ++row;
+    }
+
+    assert(row == n);
+
+    ans.resize(n);
+
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < n; ++j) {
+            assert(a[i][j] == (i == j));
+        }
+    }
+
+    for (int i = 0; i < n; ++i) {
+        ans[i] = a[i][n];
+    }
+}
+
+long long solve33(long long w, long long h) {
+
+    int T = w + 4;
+
+    vector < vector <long long> > a(T, vector <long long>(T + 1));
+
+
+    for (int i = 0; i < T; ++i) {
+        a[i][T] = solve22(w, 2 * i + h % 2);
+        long long power = 1;
+        for (int j = 0; j < T; ++j) {
+            a[i][j] = power;
+            power = power * (2 * i + h % 2) % mod;
+        }
+    }
+
+    vector <long long> poly;
+
+    gauss(a, poly);
+
+
+    for (int i = 0; i < T; ++i) {
+        long long x = 0;
+        for (int j = 0; j < T; ++j) {
+            x = (x + poly[j] * a[i][j]) % mod;
+        }
+        assert(x == a[i][T]);
+    }
+
+    for (int j = 0; j < T + 4; ++j) {
+        long long power = 1;
+
+        long long res = 0;
+
+        for (int k = 0; k < T; ++k) {
+            res += power * poly[k];
+            res %= mod;
+            power = (power * (2 * j + h % 2)) % mod;
+        }
+        assert(res == solve22(w, (2 * j + h % 2)));
+
+    }
+
+    long long power = 1;
+
+    h %= mod;
+
+    long long res = 0;
+
+    for (int i = 0; i < T; ++i) {
+        res += power * poly[i];
+        res %= mod;
+        power = (power * h) % mod;
+    }
+
+    return res;
+}
+
+long long solve3(long long w, long long h) {
+    return (solve33(w, h) - solve33(w, h - 1) + mod) % mod;
+}
+
+int main() {
+    //#define int long
+#ifdef LOCAL
+    freopen("input.txt", "r", stdin);
+    //freopen("output.txt", "w", stdout);
+#else
+#define fname "race"
+    //freopen(fname".in", "r", stdin);
+    //freopen(fname".out", "w", stdout);
+#endif
+    
+    auto start = std::chrono::high_resolution_clock::now();
+
+    long long ans = solve1(1000000000000ll, 100) + solve2(10000, 10000) + solve3(100, 1000000000000ll);
+
+    ans %= mod;
+
+    cout << ans << "\n";
+
+    auto finish = std::chrono::high_resolution_clock::now();
+
+    std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(finish-start).count() << "ms\n";
+
+
+#ifdef LOCAL
+    cerr << "Time elapsed: " << 1.0 * clock() / CLOCKS_PER_SEC * 1000 << " ms." << endl;
+#endif
+    return 0;
+} 
