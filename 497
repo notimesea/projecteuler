@@ -1,0 +1,213 @@
+#include <bits/stdc++.h>
+
+#define clr(x) memset((x), 0, sizeof(x))
+#define all(x) (x).begin(), (x).end()
+#define pb push_back
+#define mp make_pair
+#define in(x) int (x); input((x));
+#define x first
+#define y second
+typedef int itn;
+
+#define next next12345
+#define prev prev12345
+#define left lefdsf232
+#define right rig43783
+#define x1 x12345
+#define y1 y12345
+
+using namespace std;
+
+template<typename T>
+T gcd(T x, T y) {
+    while (y > 0) {
+        x %= y;
+        swap(x, y);
+    }
+    return x;
+}
+
+template<class _T>
+inline _T sqr(const _T &x) {
+    return x * x;
+}
+
+template<class _T>
+inline string tostr(const _T &a) {
+    ostringstream os("");
+    os << a;
+    return os.str();
+}
+
+typedef long double ld;
+typedef long long ll;
+typedef unsigned long long ull;
+typedef pair<int, int> PII;
+const long double PI = 3.1415926535897932384626433832795L;
+
+template<typename T>
+inline void input(T &a) {
+    static int ed;
+    a = 0;
+    while (!isdigit(ed = getchar()) && ed != '-') { }
+    char neg = 0;
+    if (ed == '-') {
+        neg = 1;
+        ed = getchar();
+    }
+    while (isdigit(ed)) {
+        a = 10 * a + ed - '0';
+        ed = getchar();
+    }
+    if (neg) a = -a;
+}
+
+template<typename T = int>
+inline T nxt() {
+    T res;
+    input(res);
+    return res;
+}
+
+mt19937 generator;
+
+long long mod = 1000000000;
+
+long long pw(long long a, long long n) {
+    long long res = 1;
+    while (n) {
+        if (n & 1ll) {
+            res = res * a % mod;
+        }
+        a = a * a % mod;
+        n >>= 1;
+    }
+    return res;
+}
+
+long long inv(long long a) {
+    return pw(a, mod - 2);
+}
+
+int ans[3][3];
+
+void solve(int cnt, int from, int to, int rem) {
+    if (!cnt) {
+        return;
+    }
+
+    solve(cnt - 1, from, rem, to);
+    if (cnt > 1) ans[rem][from]++;
+    ans[from][to]++;
+    if (cnt > 1) ans[to][rem]++;
+    solve(cnt - 1, rem, to, from);
+}
+
+long long r9 = 888888889;
+long long r3 = 666666667;
+
+const int N = 1 << 20;
+
+long long f1[N];
+long long f2[N];
+long long f3[N];
+
+long long get(int u, int v, int n) {
+    if (u == v) {
+        return 0;
+    }
+    if (u == 0 && v == 1) {
+        return f3[n];
+    }
+    if (u == 0 && v == 2) {
+        return f2[n];
+    }
+    if (u == 1 && v == 0) {
+        return f3[n];
+    }
+    if (u == 1 && v == 2) {
+        return f3[n];
+    }
+    if (u == 2 && v == 0) {
+        return f1[n];
+    }
+    if (u == 2 && v == 1) {
+        return f3[n];
+    }
+    assert(false);
+}
+
+long long get3(long long u, long long v, long long n) {
+    if (u > v) {
+        return ((sqr(n - v) - sqr(n - u)) % mod + mod) % mod;
+    } else {
+        return ((sqr(v - 1) - sqr(u - 1)) % mod + mod) % mod;
+    }
+}
+
+long long get(int k, long long n, long long a, long long b, long long c) {
+    long long x[3];
+    x[0] = a, x[1] = b, x[2] = c;
+
+    long long res = ((sqr(n - a) - sqr(n - b)) % mod + mod) % mod;
+
+    for (int i = 0; i < 3; ++i) {
+        for (int j = 0; j < 3; ++j) {
+            if (i == j) continue;
+            if (i < j) {
+                res += (sqr(x[j] - 1) % mod - sqr(x[i] - 1) + mod) % mod * get(i, j, k) % mod;
+            } else {
+                res += (sqr(n - x[j]) % mod - sqr(n - x[i]) % mod + mod) * get(i, j, k) % mod;
+            }
+        }
+    }
+    res %= mod;
+
+    return res;
+}
+
+int main() {
+    //#define int long
+#ifdef LOCAL
+    freopen("input.txt", "r", stdin);
+    //freopen("output.txt", "w", stdout);
+#else
+#define fname "race"
+    //freopen(fname".in", "r", stdin);
+    //freopen(fname".out", "w", stdout);
+#endif
+
+    f1[0] = 0;
+    f1[1] = 0;
+    f1[2] = 0;
+
+    f2[0] = 0;
+    f2[1] = 1;
+    f2[2] = 1;
+
+    f3[0] = 0;
+    f3[1] = 0;
+    f3[2] = 1;
+
+    for (int i = 3; i < N; ++i) {
+        f1[i] = (f1[i - 1] + 2 * f1[i - 2] + 2) % mod;
+        f2[i] = (f2[i - 1] + 2 * f2[i - 2]) % mod;
+        f3[i] = (f3[i - 1] + 2 * f3[i - 2] + 1) % mod;
+    }
+    
+    long long ans = 0;
+
+    const int v = 10000;
+
+    for (int i = 1; i <= v; ++i) {
+        ans += get(i, pw(10, i), pw(3, i), pw(6, i), pw(9, i));
+    }
+
+    ans %= mod;
+    cout << ans << "\n";
+    
+#ifdef LOCAL
+    cerr << "Time elapsed: " << 1.0 * clock() / CLOCKS_PER_SEC * 1000 << " ms." << endl;
+#endif
+    return 0;
+} 
