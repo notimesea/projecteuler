@@ -1,0 +1,228 @@
+#include <bits/stdc++.h>
+
+#define clr(x) memset((x), 0, sizeof(x))
+#define all(x) (x).begin(), (x).end()
+#define pb push_back
+#define mp make_pair
+#define in(x) int (x); input((x));
+#define x first
+#define y second
+typedef int itn;
+
+#define next next12345
+#define prev prev12345
+#define left lefdsf232
+#define right rig43783
+#define x1 x12345
+#define y1 y12345
+
+using namespace std;
+
+template<typename T>
+T gcd(T x, T y) {
+    while (y > 0) {
+        x %= y;
+        swap(x, y);
+    }
+    return x;
+}
+
+template<class _T>
+inline _T sqr(const _T &x) {
+    return x * x;
+}
+
+template<class _T>
+inline string tostr(const _T &a) {
+    ostringstream os("");
+    os << a;
+    return os.str();
+}
+
+typedef long double ld;
+typedef long long ll;
+typedef unsigned long long ull;
+typedef pair<int, int> PII;
+const long double PI = 3.1415926535897932384626433832795L;
+
+template<typename T>
+inline void input(T &a) {
+    static int ed;
+    a = 0;
+    while (!isdigit(ed = getchar()) && ed != '-') { }
+    char neg = 0;
+    if (ed == '-') {
+        neg = 1;
+        ed = getchar();
+    }
+    while (isdigit(ed)) {
+        a = 10 * a + ed - '0';
+        ed = getchar();
+    }
+    if (neg) a = -a;
+}
+
+template<typename T = int>
+inline T nxt() {
+    T res;
+    input(res);
+    return res;
+}
+
+mt19937 generator;
+
+const int f = 13;
+
+
+long long mod;
+
+struct number {
+    long long x;
+    long long y;
+
+    number operator*(const number &r) const {
+        return number{(x * r.x + y * r.y % mod * f) % mod, (y * r.x + x * r.y) % mod};
+    }
+    number operator+(const number &r) const {
+        return number{(x + r.x) % mod, (y + r.y) % mod};
+    }
+};
+
+#include <gmp.h>
+
+number pw(number x, long long n) {
+    number res = number{1, 0};
+
+    while (n) {
+        if (n & 1ll) {
+            res = res * x;
+        }
+        x = x * x;
+        n >>= 1;
+    }
+    return res;
+}
+
+long long pw(long long a, long long n, long long m) {
+    long long res = 1;
+    while (n) {
+        if (n & 1ll) {
+            res = res * a % m;
+        }
+        a = (a * a) % m;
+        n >>= 1;
+    }
+    return res;
+}
+
+__int128_t pw(__int128_t a, long long n, __int128_t m) {
+    __int128_t res = 1;
+    while (n) {
+        if (n & 1ll) {
+            res = res * a % m;
+        }
+        a = (a * a) % m;
+        n >>= 1;
+    }
+    return res;
+}
+
+int main() {
+    //#define int long
+#ifdef LOCAL
+    freopen("input.txt", "r", stdin);
+    //freopen("output.txt", "w", stdout);
+#else
+#define fname "race"
+    //freopen(fname".in", "r", stdin);
+    //freopen(fname".out", "w", stdout);
+#endif
+
+
+
+    int A = 1000000000;
+    int B = 10000000;
+    long long C = 1000000000000000ll;
+
+    mpz_t cur;
+    mpz_init(cur);
+
+    long long ans = 0;
+
+    for (mod = A; mod <= A + B; ++mod) {
+        if (mod % 10000 == 0) {
+            cerr << mod - A << "\n";
+        }
+        mpz_set_si(cur, mod);
+
+        if (mpz_probab_prime_p(cur, 50)) {
+
+            //number T = number{1, 0};
+
+            number mul = number{11 % mod, 3 % mod};
+            number mul2 = number{11 % mod, (mod - 3 + mod) % mod};
+            number res = number{0, 0};
+
+            long long power = -1;
+
+            number m1 = pw(mul, mod * (mod - 1));
+            if (m1.x == 1 && m1.y == 0) {
+                power = pw(__int128_t(2), C - 1, __int128_t(mod * (mod - 1)));
+                m1 = pw(mul2, mod * (mod - 1));
+                assert(m1.x == 1 && m1.y == 0);
+            } else {
+                m1 = pw(mul, (mod - 1) * (mod + 1));
+                if (m1.x == 1 && m1.y == 0) {
+                    power = pw(__int128_t(2), C - 1, __int128_t((mod + 1) * (mod - 1)));
+                    m1 = pw(mul2, (mod + 1) * (mod - 1));
+                    assert(m1.x == 1 && m1.y == 0);
+                } else {
+                    m1 = pw(mul, (mod) * (mod + 1));
+                    assert(m1.x == 1 && m1.y == 0);
+                    power = pw(__int128_t(2), C - 1, __int128_t(mod * (mod + 1)));
+                    m1 = pw(mul2, mod * (mod + 1));
+                    assert(m1.x == 1 && m1.y == 0);
+                }
+            }
+
+            long long r = pw(2, C - 1, mod - 1);
+            r = pw(2, mod - 1 - r, mod);
+
+            res = pw(mul, power) + pw(mul2, power);
+
+            assert(res.y == 0);
+
+            res.x = res.x * r % mod;
+
+            res.x += mod - 5;
+
+            res.x %= mod;
+
+            r = pw(6, mod - 2, mod);
+
+            res.x = (res.x * r) % mod;
+
+            ans += res.x;
+
+//            int step = 0;
+//
+//            do {
+//                T = T * mul;
+//                ++step;
+//            } while (step < mod * mod && (T.x != 1 || T.y != 0));
+//
+//            cout << mod << " " << step << "\n";
+//
+//            assert(step == mod * mod || 1ll * (mod - 1) * (mod + 1) % step == 0 || 1ll * (mod - 1) * mod % step == 0 || 1ll * (mod + 1) * mod % step == 0);
+
+        }
+    }
+
+    cout << ans << "\n";
+
+
+#ifdef LOCAL
+    cerr << "Time elapsed: " << 1.0 * clock() / CLOCKS_PER_SEC * 1000 << " ms." << endl;
+#endif
+    return 0;
+} 
