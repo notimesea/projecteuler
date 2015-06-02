@@ -1,0 +1,386 @@
+#include <bits/stdc++.h>
+
+#define clr(x) memset((x), 0, sizeof(x))
+#define all(x) (x).begin(), (x).end()
+#define pb push_back
+#define mp make_pair
+#define in(x) int (x); input((x));
+#define x first
+#define y second
+typedef int itn;
+
+#define next next12345
+#define prev prev12345
+#define left lefdsf232
+#define right rig43783
+#define x1 x12345
+#define y1 y12345
+
+using namespace std;
+
+template<typename T>
+T gcd(T x, T y) {
+    while (y > 0) {
+        x %= y;
+        swap(x, y);
+    }
+    return x;
+}
+
+template<class _T>
+inline _T sqr(const _T &x) {
+    return x * x;
+}
+
+template<class _T>
+inline string tostr(const _T &a) {
+    ostringstream os("");
+    os << a;
+    return os.str();
+}
+
+typedef long double ld;
+typedef long long ll;
+typedef unsigned long long ull;
+typedef pair<int, int> PII;
+const long double PI = 3.1415926535897932384626433832795L;
+
+template<typename T>
+inline void input(T &a) {
+    static int ed;
+    a = 0;
+    while (!isdigit(ed = getchar()) && ed != '-') { }
+    char neg = 0;
+    if (ed == '-') {
+        neg = 1;
+        ed = getchar();
+    }
+    while (isdigit(ed)) {
+        a = 10 * a + ed - '0';
+        ed = getchar();
+    }
+    if (neg) a = -a;
+}
+
+template<typename T = int>
+inline T nxt() {
+    T res;
+    input(res);
+    return res;
+}
+
+mt19937 generator;
+
+#include "gmp.h"
+
+struct data {
+    mpz_t x;
+
+    data(const unsigned long &r) {
+        mpz_init(x);
+        mpz_set_ui(x, r);
+    }
+
+    ~data() {
+        mpz_clear(x);
+    }
+
+    data & operator*=(const unsigned long &r) {
+        mpz_mul_ui(x, x, r);
+        return *this;
+    }
+
+    data & operator*=(const data &r) {
+        mpz_mul(x, x, r.x);
+        return *this;
+    }
+
+    data & operator/=(const unsigned long &r) {
+        mpz_div_ui(x, x, r);
+        return *this;
+    }
+
+    data & operator+=(const unsigned long &r) {
+        mpz_add_ui(x, x, r);
+        return *this;
+    }
+    data & operator+=(const data &r) {
+        mpz_add(x, x, r.x);
+        return *this;
+    }
+
+    data & operator-=(const unsigned long &r) {
+        mpz_sub_ui(x, x, r);
+        return *this;
+    }
+
+    data & operator-=(const data &r) {
+        mpz_sub(x, x, r.x);
+        return *this;
+    }
+
+    int congruent(const unsigned long &mod, const unsigned long &r) const {
+        return mpz_congruent_ui_p(x, r, mod);
+    }
+
+    data(const data &r) {
+        mpz_init(x);
+        mpz_set(x, r.x);
+    }
+
+    data & operator=(const data &r) {
+        if (this != &r) {
+            mpz_set(x, r.x);
+        }
+        return *this;
+    }
+
+    bool operator<(const data &r) const {
+        return mpz_cmp(x, r.x) < 0;
+    }
+
+    bool operator==(const data &r) const {
+        return mpz_cmp(x, r.x) == 0;
+    }
+};
+
+set <data> st;
+
+struct line {
+    data a, b, c;
+};
+
+vector <data> numbers;
+vector <line> pp;
+
+long long answer = 0;
+
+int need;
+
+//(a1 x - b1) / c1 = (a2 x - b2) / c2
+
+//(a x - b) / c
+//1)
+//2 * a, 2 * b
+//2
+//((a * x - b - c) / c) / 3
+
+long long fib[100];
+
+void rec(int flag) {
+//    if (flag) {
+//        answer += fib[need - numbers.size() + 1];
+//        return;
+//    }
+    if (!flag) for (int i = 0; i + 1 < pp.size(); ++i) {
+        data u = pp[i].a;
+        u *= pp.back().c;
+
+        data v = pp.back().a;
+        v *= pp[i].c;
+
+        data x = pp[i].b;
+        x *= pp.back().c;
+
+        data y = pp.back().b;
+        y *= pp[i].c;
+
+        if (u < v) {
+            v -= u;
+            y -= x;
+            v *= 16;
+
+            if (v < y) {
+                //cout << v.x << " " << pp.size() << "\n";
+                gmp_printf("%Zd %d\n", numbers.back().x, numbers.size());
+                flag = 1;
+                break;
+            }
+        } else {
+            u -= v;
+            x -= y;
+            u *= 16;
+            if (u < x) {
+                //cout << v.x << " " << pp.size() << "\n";
+                gmp_printf("%Zd %d\n", numbers.back().x, numbers.size());
+                flag = 1;
+                break;
+            }
+        }
+    }
+    if (numbers.size() == need) {
+        answer += flag;
+        return;
+    }
+
+    data x = numbers.back();
+    x *= 2;
+    pp.push_back(pp.back());
+    pp.back().a *= 2;
+    pp.back().b *= 2;
+    numbers.push_back(x);
+    rec(flag);
+    numbers.pop_back();
+    pp.pop_back();
+
+    if (numbers.back().congruent(3, 1) && !numbers.back().congruent(6, 1)) {
+        x = numbers.back();
+        x -= 1;
+        x /= 3;
+        pp.push_back(pp.back());
+        pp.back().b += pp.back().c;
+        pp.back().c *= 3;
+        numbers.push_back(x);
+        rec(flag);
+        numbers.pop_back();
+        pp.pop_back();
+    }
+}
+
+void rec2(int pos, data num) {
+    if (pos == need) {
+        ++answer;
+        return;
+    }
+    data x = num;
+    x *= 2;
+    rec2(pos + 1, x);
+
+    if (num.congruent(3, 1) && !num.congruent(6, 1)) {
+        x = num;
+        x -= 1;
+        x /= 3;
+        rec2(pos + 1, x);
+    }
+}
+
+int main() {
+    //#define int long
+#ifdef LOCAL
+    freopen("input.txt", "r", stdin);
+    //freopen("output.txt", "w", stdout);
+#else
+#define fname "race"
+    //freopen(fname".in", "r", stdin);
+    //freopen(fname".out", "w", stdout);
+#endif
+
+    fib[0] = 0, fib[1] = 1;
+
+    for (int i = 2; i < 100; ++i) {
+        fib[i] = fib[i - 2] + fib[i - 1];
+    }
+
+    data four = 5;
+
+    data zero = 0;
+
+    need = 90;
+
+    const int magic = 1;
+
+
+    for (int start = 1; start <= 1000; ++start) {
+        data z = start;
+        vector <int> ops;
+        while (mpz_popcount(z.x) > 1) {
+            if (z.congruent(2, 0)) {
+                ops.push_back(0);
+                z /= 2;
+            } else {
+                ops.push_back(1);
+                z *= 3;
+                z += 1;
+            }
+        }
+        if (z == 16) {
+            pp.clear();
+            reverse(all(ops));
+            pp.push_back(line{data(1), data(0), data(1)});
+
+            int flag = 0;
+
+            for (int op : ops) {
+                if (op == 0) {
+                    pp.push_back(pp.back());
+                    pp.back().a *= 2;
+                    pp.back().b *= 2;
+                } else {
+                    pp.push_back(pp.back());
+                    pp.back().b += pp.back().c;
+                    pp.back().c *= 3;
+                }
+            }
+            for (int j = 1; j < pp.size(); ++j) {
+                char ok = false;
+                for (int i = 1; i < j; ++i) {
+                    data u = pp[i].a;
+                    u *= pp[j].c;
+
+                    data v = pp[j].a;
+                    v *= pp[i].c;
+
+                    data x = pp[i].b;
+                    x *= pp[j].c;
+
+                    data y = pp[j].b;
+                    y *= pp[i].c;
+
+                    if (u < v) {
+                        v -= u;
+                        y -= x;
+                        v *= 16;
+
+                        if (v < y) {
+                            ok = 1;
+                            break;
+                        }
+                    } else {
+                        u -= v;
+                        x -= y;
+                        u *= 16;
+                        if (u < x) {
+                            ok = 1;
+                            break;
+                        }
+                    }
+                }
+                if (ok && j + 1 != pp.size()) {
+                    //cout << start << " " << j << " " << pp.size() << "\n";
+                    goto l1;
+                }
+                if (ok) {
+                    flag = 1;
+                }
+            }
+
+            if (flag && ops.size() <= need) {
+                cout << start << "\n";
+                rec2(ops.size(), data(start));
+            }
+            l1:;
+        }
+    }
+
+    answer += fib[need];
+
+    cout << answer << "\n";
+
+//    for (int i = 0; i < magic; ++i) {
+//        numbers.push_back(four);
+//        pp.push_back(line{data(1), data(1), data(3)});
+//        rec(0);
+//        numbers.pop_back();
+//        pp.pop_back();
+//        four *= 4;
+//        four += 1;
+//    }
+//
+//
+//    cout << answer << "\n";
+
+#ifdef LOCAL
+    cerr << "Time elapsed: " << 1.0 * clock() / CLOCKS_PER_SEC * 1000 << " ms." << endl;
+#endif
+    return 0;
+} 
