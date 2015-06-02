@@ -1,0 +1,310 @@
+#include <bits/stdc++.h>
+
+#define clr(x) memset((x), 0, sizeof(x))
+#define all(x) (x).begin(), (x).end()
+#define pb push_back
+#define mp make_pair
+#define in(x) int (x); input((x));
+#define x first
+#define y second
+typedef int itn;
+
+#define next next12345
+#define prev prev12345
+#define left lefdsf232
+#define right rig43783
+#define x1 x12345
+#define y1 y12345
+
+using namespace std;
+
+template<typename T>
+T gcd(T x, T y) {
+    while (y > 0) {
+        x %= y;
+        swap(x, y);
+    }
+    return x;
+}
+
+template<class _T>
+inline _T sqr(const _T &x) {
+    return x * x;
+}
+
+template<class _T>
+inline string tostr(const _T &a) {
+    ostringstream os("");
+    os << a;
+    return os.str();
+}
+
+typedef long double ld;
+typedef long long ll;
+typedef unsigned long long ull;
+typedef pair<int, int> PII;
+const long double PI = 3.1415926535897932384626433832795L;
+
+template<typename T>
+inline void input(T &a) {
+    static int ed;
+    a = 0;
+    while (!isdigit(ed = getchar()) && ed != '-') { }
+    char neg = 0;
+    if (ed == '-') {
+        neg = 1;
+        ed = getchar();
+    }
+    while (isdigit(ed)) {
+        a = 10 * a + ed - '0';
+        ed = getchar();
+    }
+    if (neg) a = -a;
+}
+
+template<typename T = int>
+inline T nxt() {
+    T res;
+    input(res);
+    return res;
+}
+
+mt19937 generator;
+
+vector <int> cur;
+
+vector <vector <int> > partitions;
+
+void genPartitions(int s, int prev) {
+    if (s == 0) {
+        partitions.push_back(cur);
+        return;
+    }
+    for (int i = 1; i <= s && i <= prev; ++i) {
+        cur.push_back(i);
+        genPartitions(s - i, i);
+        cur.pop_back();
+    }
+}
+
+long long mod = 1000000007;
+
+const int K = 30;
+const int maxP = 30000;
+
+unordered_map <int, long long> ans[maxP][K + 1];
+
+unordered_map <int, long long> ans2[maxP];
+
+long long get(int p1, int p2) {
+    if (p1 == 0) {
+        assert(p2 == 0);
+        return 1;
+    }
+    if (ans2[p1].count(p2)) {
+        return ans2[p1][p2];
+    }
+
+    long long & res = ans2[p1][p2];
+
+    vector <int> pp = partitions[p1];
+    int need = pp.back();
+    pp.pop_back();
+    int pos2 = (int) (lower_bound(all(partitions), pp) - partitions.begin());
+    for (const auto & x : ans[p2][need]) {
+        res += get(pos2, x.x) * x.y;
+        res %= mod;
+    }
+    return res;
+}
+
+const int N = 11111;
+
+long long r[N];
+long long f[N];
+long long fi[N];
+
+int pp[N];
+vector <int> primes;
+vector <int> powers;
+
+void precalc() {
+    r[1] = 1;
+    for (int i = 2; i < N; ++i) {
+        r[i] = (mod - r[mod % i] * (mod / i) % mod) % mod;
+    }
+    f[0] = fi[0] = 1;
+    for (int i = 1; i < N; ++i) {
+        f[i] = f[i - 1] * i % mod;
+        fi[i] = fi[i - 1] * r[i] % mod;
+    }
+
+    for (int i = 2; i < N; ++i) {
+        if (!pp[i]) {
+            primes.push_back(i);
+            for (int j = i + i; j < N; j += i) {
+                pp[j] = 1;
+            }
+        }
+    }
+}
+
+long long pw(long long a, long long n) {
+    long long res = 1;
+    while (n) {
+        if (n & 1ll) {
+            res = res * a % mod;
+        }
+        a = a * a % mod;
+        n >>= 1;
+    }
+    return res;
+}
+
+long long binomial(int n, int k) {
+    if (k > n) return 0;
+    return f[n] * fi[k] % mod * fi[n - k] % mod;
+}
+
+
+int main() {
+    //#define int long
+#ifdef LOCAL
+    freopen("input.txt", "r", stdin);
+    //freopen("output.txt", "w", stdout);
+#else
+#define fname "race"
+    //freopen(fname".in", "r", stdin);
+    //freopen(fname".out", "w", stdout);
+#endif
+
+    precalc();
+
+    int k = 30;
+    int n = 10000;
+
+    powers.resize(primes.size());
+
+    for (int i = 0; i < (int)primes.size(); ++i) {
+        for (int v = n / primes[i]; v; v /= primes[i]) {
+            powers[i] += v;
+        }
+    }
+
+    genPartitions(k, k);
+
+    auto pk = partitions;
+
+    for (int i = 0; i < k; ++i) {
+        genPartitions(i, i);
+    }
+
+    sort(all(partitions));
+
+    for (const auto & p : partitions) {
+        map <pair <int, vector <int> >, long long> dp;
+
+        dp[{0, vector <int>()}] = 1;
+
+        for (int x : p) {
+            map <pair <int, vector <int> >, long long> tmp;
+            for (const auto & y : dp) {
+                pair <int, vector <int> > to = y.x;
+                to.x += x;
+                tmp[to] += y.y;
+                tmp[to] %= mod;
+                to = y.x;
+                to.y.push_back(x);
+
+                tmp[to] += y.y;
+                tmp[to] %= mod;
+            }
+            dp.swap(tmp);
+        }
+
+        int pos = (int) (lower_bound(all(partitions), p) - partitions.begin());
+
+        for (const auto & y : dp) {
+            int px = (int) (lower_bound(all(partitions), y.x.y) - partitions.begin());
+            ans[pos][y.x.x][px] += y.y;
+            ans[pos][y.x.x][px] %= mod;
+        }
+    }
+
+    sort(all(pk), [](const vector <int> &u, const vector <int> &v) {
+        return u.size() < v.size();
+    });
+
+    vector <long long> res(pk.size());
+
+    for (int pos = 0; pos < (int)pk.size(); ++pos) {
+        //cerr << pos << "\n";
+        vector <int> & p = pk[pos];
+
+        int l = 1;
+        for (int x : p) {
+            l = l * x / gcd(l, x);
+        }
+        vector <long long> dp(l * (int)p.size() - k + 1);
+        dp[0] = 1;
+        for (int x : p) {
+            vector <long long> tmp(dp.size());
+            for (int i = 0; i < (int)dp.size(); ++i) {
+                for (int j = 0; j < l && i + j < (int)dp.size(); j += x) {
+                    tmp[i + j] += dp[i];
+                    tmp[i + j] %= mod;
+                }
+            }
+            dp.swap(tmp);
+        }
+//        vector <long long> dp2(n);
+//        dp2[0] = 1;
+//        for (int x : p) {
+//            vector <long long> tmp(dp2.size());
+//            for (int i = 0; i < dp2.size(); ++i) {
+//                for (int j = 0; i + j < dp2.size(); j += x) {
+//                    tmp[i + j] += dp2[i];
+//                    tmp[i + j] %= mod;
+//                }
+//            }
+//            tmp.swap(dp2);
+//        }
+        long long value = 1;
+        for (int i = 0; i < (int)primes.size(); ++i) {
+            int t = powers[i] / l;
+            int v = powers[i] % l;
+            long long x = 0;
+            for (int j = 0; j < (int)p.size() && v + l * j < (int)dp.size(); ++j) {
+                x += dp[v + l * j] * binomial((int) (t + p.size() - 1 - j), (int) (p.size() - 1));
+                x %= mod;
+            }
+            //assert(x == dp2[powers[i]]);
+            value = (value * x) % mod;
+        }
+
+        int v = (int) (lower_bound(all(partitions), p) - partitions.begin());
+
+        long long z = get(v, v);
+
+        assert(z);
+
+        z = pw(z, mod - 2);
+
+        value = value * z % mod;
+
+        for (int i = 0; i < pos; ++i) {
+            int vv = (int) (lower_bound(all(partitions), pk[i]) - partitions.begin());
+            long long qq = get(vv, v) * z % mod * res[i] % mod;
+            value = (value - qq + mod) % mod;
+        }
+
+        res[pos] = value;
+    }
+
+    cout << res.back() << "\n";
+
+#ifdef LOCAL
+    cerr << "Time elapsed: " << 1.0 * clock() / CLOCKS_PER_SEC * 1000 << " ms." << endl;
+#endif
+    return 0;
+} 
