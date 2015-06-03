@@ -1,0 +1,190 @@
+#include <bits/stdc++.h>
+
+#define clr(x) memset((x), 0, sizeof(x))
+#define all(x) (x).begin(), (x).end()
+#define pb push_back
+#define mp make_pair
+#define in(x) int (x); input((x));
+#define x first
+#define y second
+typedef int itn;
+
+#define next next12345
+#define prev prev12345
+#define left lefdsf232
+#define right rig43783
+#define x1 x12345
+#define y1 y12345
+
+using namespace std;
+
+template<typename T>
+T gcd(T x, T y) {
+    while (y > 0) {
+        x %= y;
+        swap(x, y);
+    }
+    return x;
+}
+
+template<class _T>
+inline _T sqr(const _T &x) {
+    return x * x;
+}
+
+template<class _T>
+inline string tostr(const _T &a) {
+    ostringstream os("");
+    os << a;
+    return os.str();
+}
+
+typedef long double ld;
+typedef long long ll;
+typedef unsigned long long ull;
+typedef pair<int, int> PII;
+const long double PI = 3.1415926535897932384626433832795L;
+
+template<typename T>
+inline void input(T &a) {
+    static int ed;
+    a = 0;
+    while (!isdigit(ed = getchar()) && ed != '-') { }
+    char neg = 0;
+    if (ed == '-') {
+        neg = 1;
+        ed = getchar();
+    }
+    while (isdigit(ed)) {
+        a = 10 * a + ed - '0';
+        ed = getchar();
+    }
+    if (neg) a = -a;
+}
+
+template<typename T = int>
+inline T nxt() {
+    T res;
+    input(res);
+    return res;
+}
+
+mt19937 generator;
+
+
+const int N = 100000001;
+
+int lp[N];
+
+const int K = 150000;
+
+int p[K];
+
+int s[K];
+
+long long divs[K];
+
+int sz;
+int r;
+
+void gen(int pos, long long d) {
+    //cerr << pos << " " << d << "\n";
+    if (pos == sz) {
+        divs[r++] = d;
+        return;
+    }
+
+    for (int i = 0; i <= s[pos]; ++i) {
+        gen(pos + 1, d);
+        d *= p[pos];
+    }
+}
+
+int main() {
+    //#define int long
+#ifdef LOCAL
+    freopen("input.txt", "r", stdin);
+    //freopen("output.txt", "w", stdout);
+#else
+#define fname "race"
+    //freopen(fname".in", "r", stdin);
+    //freopen(fname".out", "w", stdout);
+#endif
+    lp[0] = -1;
+    lp[1] = -1;
+    vector <int> primes;
+
+    //(a + 1) * (c + 1) = (b + 1) * (b + 1)
+
+
+    for (int i = 2; i < N; ++i) {
+        if (!lp[i]) {
+            primes.push_back(i);
+            for (int j = i; j < N; j += i) {
+                lp[j] = i;
+            }
+        }
+    }
+
+    long long ans = 0;
+
+    int it = 0;
+
+    for (int x : primes) {
+        if (it % 10000 == 0) {
+            cerr << it / (double)primes.size() * 100 << "%\n";
+        }
+        ++it;
+//        if (it < 2364880 + 1) {
+//            continue;
+//        }
+//        cerr << it << "\n";
+        long long y = x + 1;
+
+        long long z = y;
+
+        sz = 0;
+
+        while (z > 1) {
+            int l = lp[z];
+            p[sz] = l;
+            s[sz] = 0;
+            while (lp[z] == l) {
+                s[sz] += 2;
+                z /= l;
+                assert(s[sz] < 1000);
+            }
+            ++sz;
+            assert(sz < 1000);
+        }
+
+//        cerr << sz << "\n";
+//
+//        for (int i = 0; i < sz; ++i) {
+//            cerr << p[i] << " " << s[i] << "\n";
+//        }
+
+        r = 0;
+        gen(0, 1ll);
+
+        //cerr << r << "\n";
+
+        for (int i = 0; i < r; ++i) {
+            long long u = y * y / divs[i];
+            long long v = divs[i];
+            if (u > 2 && u < N && v > 2 && v < N) {
+                if (lp[u - 1] == u - 1 && lp[v - 1] == v - 1) {
+                    ans += u - 1 + v - 1 + y - 1;
+                }
+            }
+        }
+        ans -= 3 * x;
+    }
+
+    cout << ans / 2 << "\n";
+
+#ifdef LOCAL
+    cerr << "Time elapsed: " << 1.0 * clock() / CLOCKS_PER_SEC * 1000 << " ms." << endl;
+#endif
+    return 0;
+}
