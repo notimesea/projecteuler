@@ -1,0 +1,225 @@
+#include <bits/stdc++.h>
+
+#define clr(x) memset((x), 0, sizeof(x))
+#define all(x) (x).begin(), (x).end()
+#define pb push_back
+#define mp make_pair
+#define in(x) int (x); input((x));
+#define x first
+#define y second
+typedef int itn;
+
+#define next next12345
+#define prev prev12345
+#define left lefdsf232
+#define right rig43783
+#define x1 x12345
+#define y1 y12345
+
+using namespace std;
+
+template<typename T>
+T gcd(T x, T y) {
+    while (y > 0) {
+        x %= y;
+        swap(x, y);
+    }
+    return x;
+}
+
+template<class _T>
+inline _T sqr(const _T &x) {
+    return x * x;
+}
+
+template<class _T>
+inline string tostr(const _T &a) {
+    ostringstream os("");
+    os << a;
+    return os.str();
+}
+
+typedef long double ld;
+typedef long long ll;
+typedef unsigned long long ull;
+typedef pair<int, int> PII;
+const long double PI = 3.1415926535897932384626433832795L;
+
+template<typename T>
+inline void input(T &a) {
+    static int ed;
+    a = 0;
+    while (!isdigit(ed = getchar()) && ed != '-') { }
+    char neg = 0;
+    if (ed == '-') {
+        neg = 1;
+        ed = getchar();
+    }
+    while (isdigit(ed)) {
+        a = 10 * a + ed - '0';
+        ed = getchar();
+    }
+    if (neg) a = -a;
+}
+
+template<typename T = int>
+inline T nxt() {
+    T res;
+    input(res);
+    return res;
+}
+
+mt19937 generator;
+
+typedef vector <vector <long long> > matrix;
+
+const int N = 1000000;
+
+int lp[N + 1];
+
+vector <long long> primes;
+
+unordered_map <long long, long long> dp[N];
+
+long long get(long long m, int n) {
+    n = min(n, (int)(upper_bound(all(primes), m) - primes.begin() - 1));
+    long long z = (long long) (sqrt(m) + 1e-9);
+    int pos = min(n, (int)(upper_bound(all(primes), z) - primes.begin()) - 1);
+    long long add = n - pos;
+    n = pos;
+    if (m <= 1) {
+        return m - add;
+    }
+    if (n == -1) {
+        return m - add;
+    }
+    if (dp[n].count(m)) {
+        return dp[n][m] - add;
+    }
+
+    return (dp[n][m] = get(m, n - 1) - get(m / primes[n], n - 1)) - add;
+}
+
+long long get(long long x) {
+    return get(x, (int)primes.size() - 1) + (upper_bound(all(primes), x) - primes.begin() - 1);
+}
+
+unordered_map <long long, long long> dp2[N];
+vector <long long> primeSum;
+
+long long mod = 1000000000;//123;
+long long r2 = (mod + 1) / 2;
+
+long long get2(long long m, int n) {
+    n = min(n, (int)(upper_bound(all(primes), m) - primes.begin() - 1));
+    long long z = (long long) (sqrtl(m) + 1e-9);
+    int pos = min(n, (int)(upper_bound(all(primes), z) - primes.begin()) - 1);
+    long long add = (primeSum[n + 1] - primeSum[pos + 1]) % mod;
+    n = pos;
+    if (m <= 1 || n == -1) {
+        if (m % 2 == 0) {
+            return ((m / 2) % mod * ((m + 1) % mod) - add) % mod;
+        } else {
+            return ((m + 1) / 2 % mod * (m % mod) - add) % mod;
+        }
+    }
+    if (dp2[n].count(m)) {
+        return (dp2[n][m] - add) % mod;
+    }
+
+    return ((dp2[n][m] = (get2(m, n - 1) - primes[n] * get2(m / primes[n], n - 1)) % mod) - add) % mod;
+}
+
+long long get2(long long x) {
+    return (get2(x, (int)primes.size() - 1) + primeSum[(upper_bound(all(primes), x) - primes.begin())] - 1) % mod;
+}
+
+
+int main() {
+    //#define int long
+#ifdef LOCAL
+    freopen("input.txt", "r", stdin);
+    //freopen("output.txt", "w", stdout);
+#else
+#define fname "race"
+    //freopen(fname".in", "r", stdin);
+    //freopen(fname".out", "w", stdout);
+#endif
+
+
+    for (int i = 2; i <= N; ++i) {
+        if (!lp[i]) {
+            primes.push_back(i);
+            for (int j = i; j <= N; j += i) {
+                if (!lp[j]) lp[j] = i;
+            }
+        }
+    }
+    primeSum.resize(primes.size() + 1);
+    primeSum[0] = 0;
+    for (int i = 0; i < (int)primes.size(); ++i) {
+        primeSum[i + 1] = (primeSum[i] + primes[i]) % mod;
+    }
+
+//    long long l = 1, r = 1000000000000ll;
+//    long long need = 1000000000;
+//    while (l < r) {
+//        long long m = (l + r) / 2;
+//        if (get(m) < need) {
+//            l = m + 1;
+//        } else {
+//            r = m;
+//        }
+//        cerr << l << " " << r << "\n";
+//    }
+//
+//    cout << (get2(l) + mod) % mod << "\n";
+
+//    for (int i = 0; i < (int)primes.size(); ++i) {
+//        assert(get(primes[i]) == i + 1);
+//        assert((get2(primes[i]) + mod) % mod == primeSum[i + 1] % mod);
+//    }
+
+    auto start = std::chrono::high_resolution_clock::now();
+
+    long long n = 1000000000000ll;
+
+    assert((get2(primes.back()) + mod) % mod == primeSum.back() % mod);
+
+    long long x = 0;
+    long long last = 0;
+    for (int i = 0; i < (int)primes.size() && primes[i] * primes[i] <= n; ++i) {
+        cerr << i << "\n";
+        x += primes[i] * get(n / primes[i], i - 1) % mod;
+        last = primes[i];
+    }
+
+    x %= mod;
+
+    //568404989
+
+//    long long z = 0;
+//    for (int i = 2; i <= n; ++i) {
+//        z += lp[i];
+//    }
+//    cout << z % mod << "\n";
+
+    x += get2(n) - get2(last);
+
+    x %= mod;
+
+    if (x < 0) {
+        x += mod;
+    }
+
+    cout << x << "\n";
+    auto finish = std::chrono::high_resolution_clock::now();
+
+    std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(finish-start).count() << "ms\n";
+
+
+#ifdef LOCAL
+    cerr << "Time elapsed: " << 1.0 * clock() / CLOCKS_PER_SEC * 1000 << " ms." << endl;
+#endif
+    return 0;
+}
