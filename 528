@@ -1,0 +1,41 @@
+
+def binomial(n, k):
+    res = 1
+    for i in xrange(k):
+        res *= n - i
+    for i in xrange(k):
+        res /= i + 1
+    return res
+
+mod = 1000000007
+
+def solve(bound, k, b):
+    answer = 0
+    for mask in xrange(2**k):
+        degree = 0
+        sign = 1
+        for i in xrange(k):
+            if mask & (1 << i):
+                degree += ((b**(i+1)) + 1)
+                sign *= -1
+        if degree > bound:
+            continue
+        delta = bound - degree
+        answer += sign * binomial(delta + k, k)
+
+    return answer
+
+print solve(14, 3, 2)
+print solve(200, 5, 3)
+print solve(1000, 10, 5) % mod
+
+answer = 0
+
+l = 10
+r = 15
+
+for k in range(l, r + 1):
+    bound = 10**k
+    answer += solve(bound, k, k)
+
+print answer % mod
