@@ -1,0 +1,184 @@
+#include <bits/stdc++.h>
+
+#define clr(x) memset((x), 0, sizeof(x))
+#define all(x) (x).begin(), (x).end()
+#define pb push_back
+#define mp make_pair
+#define in(x) int (x); input((x));
+#define x first
+#define y second
+typedef int itn;
+
+#define next next12345
+#define prev prev12345
+#define left lefdsf232
+#define right rig43783
+#define x1 x12345
+#define y1 y12345
+
+using namespace std;
+
+template<typename T>
+T gcd(T x, T y) {
+    while (y > 0) {
+        x %= y;
+        swap(x, y);
+    }
+    return x;
+}
+
+template<class _T>
+inline _T sqr(const _T &x) {
+    return x * x;
+}
+
+template<class _T>
+inline string tostr(const _T &a) {
+    ostringstream os("");
+    os << a;
+    return os.str();
+}
+
+typedef long double ld;
+typedef long long ll;
+typedef unsigned long long ull;
+typedef pair<int, int> PII;
+const long double PI = 3.1415926535897932384626433832795L;
+
+template<typename T>
+inline void input(T &a) {
+    static int ed;
+    a = 0;
+    while (!isdigit(ed = getchar()) && ed != '-') { }
+    char neg = 0;
+    if (ed == '-') {
+        neg = 1;
+        ed = getchar();
+    }
+    while (isdigit(ed)) {
+        a = 10 * a + ed - '0';
+        ed = getchar();
+    }
+    if (neg) a = -a;
+}
+
+template<typename T = int>
+inline T nxt() {
+    T res;
+    input(res);
+    return res;
+}
+
+mt19937 generator;
+
+
+long long mod = 1000000007;
+
+long long pw(long long a, long long n) {
+    long long res = 1;
+    while (n) {
+        if (n & 1ll) {
+            res = res * a % mod;
+        }
+        a = a * a % mod;
+        n >>= 1;
+    }
+    return res;
+}
+
+long long inv(long long a) {
+    return pw(a, mod - 2);
+}
+
+int get(int n, int p) {
+    int res = 0;
+    while (n) {
+        res += n / p;
+        n /= p;
+    }
+    return res;
+}
+
+int get2(int n, int p) {
+    int res = 0;
+    while (n) {
+        res += n % p;
+        n /= p;
+    }
+    return res;
+}
+
+int dp[50][50];
+
+int solve(vector <int> & x) {
+    int res = 0;
+    while (1) {
+        for (int i = 0; i + 1 < x.size(); ++i) {
+            if (x[i] > x[i + 1]) {
+                int z = x[i + 1];
+                x.erase(x.begin() + i + 1);
+                x.insert(x.begin(), z);
+                ++res;
+                goto l1;
+            }
+        }
+        break;
+        l1:;
+    }
+    return res;
+}
+
+int solve(int k, int p) {
+    int & res = dp[k][p];
+    if (~res) {
+        return res;
+    }
+    vector <int> x;
+    for (int i = 0; i < k + 1; ++i) {
+        if (i == p) continue;
+        x.push_back(i);
+    }
+    x.push_back(p);
+    res = solve(x);
+    return res;
+}
+
+double ans[1 << 30];
+
+int main() {
+    //#define int long
+#ifdef LOCAL
+    freopen("input.txt", "r", stdin);
+    //freopen("output.txt", "w", stdout);
+#else
+    #define fname "race"
+    //freopen(fname".in", "r", stdin);
+    //freopen(fname".out", "w", stdout);
+#endif
+    int n = 30;
+    memset(dp, 255, sizeof(dp));
+
+    for (int mask = (1 << n) - 1; mask >= 0; --mask) {
+        int pos = 0;
+        int c = __builtin_popcount(mask);
+        for (int i = 0; i < n; ++i) {
+            if (mask & (1 << i)) {
+                ++pos;
+                continue;
+            }
+            ans[mask] += solve(c, pos) + ans[mask ^ (1 << i)];
+        }
+        //cerr << mask << " " << ans[mask] << "\n";
+        if (c != n) {
+            ans[mask] /= (n - c);
+        }
+    }
+    cout << setprecision(2) << fixed;
+    cout << ans[0] << "\n";
+
+
+#ifdef LOCAL
+    cerr << "Time elapsed: " << 1.0 * clock() / CLOCKS_PER_SEC * 1000 << " ms." << endl;
+#endif
+    return 0;
+}
