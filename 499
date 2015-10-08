@@ -1,0 +1,45 @@
+import math
+from matplotlib import pyplot as plp
+
+import numpy as np
+
+m = 15
+n = 1000000000
+k = 5
+
+dt = np.dtype(np.float64)
+
+b = np.zeros(m - 1, dtype=dt)
+
+iters = 1000
+
+two = 1
+
+while two < m - 1:
+    b[two - 1] = 0.5 / two
+    two *= 2
+
+a = np.zeros((m - 1, m - 1), dtype=dt)
+
+for i in xrange(m - 2):
+    a[i + 1][i] = 1
+
+x = np.array(b, dtype=dt)
+
+for phase in xrange(iters):
+    for i in xrange(m - 1):
+        a[i][m - 2] = x[i]
+
+    B = np.zeros((m - 1, m - 1))
+
+    for i in xrange(k, 128):
+        B += np.linalg.matrix_power(a, 2**(i-1) - m) / (2**i)
+
+    B -= np.identity(m - 1)
+
+    x = -np.linalg.solve(B, b)
+
+print x
+
+
+print "%.20f" % (1 - np.dot(np.linalg.matrix_power(a, n - m), x).sum())
