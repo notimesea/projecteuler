@@ -1,0 +1,420 @@
+#include <bits/stdc++.h>
+#include <smmintrin.h>
+
+#define clr(x) memset((x), 0, sizeof(x))
+#define all(x) (x).begin(), (x).end()
+#define pb push_back
+#define mp make_pair
+#define in(x) int (x); input((x));
+#define x first
+#define y second
+#define fi first
+#define se second
+#define forn(i, n) for(int i = 0; i < (int)(n); ++i)
+#define ford(i, n) for(int i = (int)(n) - 1; i >= 0; --i)
+#define fore(i, a, b) for(int i = (int)(a); i <= (int)(b); ++i)
+#define for1(i, n) for(int i = 1; i <= (int)(n); ++i)
+
+
+typedef int itn;
+
+#define next next12345
+#define prev prev12345
+#define left lefdsf232
+#define right rig43783
+#define x1 x12345
+#define y1 y12345
+
+using namespace std;
+
+template<typename T>
+T gcd(T x, T y) {
+    while (y > 0) {
+        x %= y;
+        swap(x, y);
+    }
+    return x;
+}
+
+template<class _T>
+inline _T sqr(const _T &x) {
+    return x * x;
+}
+
+template<class _T>
+inline string tostr(const _T &a) {
+    ostringstream os("");
+    os << a;
+    return os.str();
+}
+
+typedef long double ld;
+typedef long long ll;
+typedef long long i64;
+typedef unsigned long long ull;
+typedef unsigned long long u64;
+typedef pair<int, int> PII;
+typedef pair<int, int> pii;
+const long double PI = 3.1415926535897932384626433832795L;
+
+template<typename T>
+inline void input(T &a) {
+    static int ed;
+    a = 0;
+    while (!isdigit(ed = getchar()) && ed != '-') { }
+    char neg = 0;
+    if (ed == '-') {
+        neg = 1;
+        ed = getchar();
+    }
+    while (isdigit(ed)) {
+        a = 10 * a + ed - '0';
+        ed = getchar();
+    }
+    if (neg) a = -a;
+}
+
+template<typename T = int>
+inline T nxt() {
+    T res;
+    input(res);
+    return res;
+}
+ull mod = 1000000007;
+
+long long pw(long long a, long long n) {
+    long long res = 1;
+    while (n) {
+        if (n & 1ll) {
+            res = res * a % mod;
+        }
+        a = a * a % mod;
+        n >>= 1;
+    }
+    return res;
+}
+
+long long inv(long long a) {
+    return pw(a, mod - 2);
+}
+typedef pair <vector <int>, int> state;
+
+int base = 10;
+
+state go(const state &s, int digit) {
+    if (digit == 0) {
+        return s;
+    }
+    vector <int> x = s.x;
+    x.insert(x.begin(), 0);
+    for (auto & t : x) {
+        t += digit;
+    }
+    while (x.back() > base) {
+        x.pop_back();
+    }
+    int y = s.y + 1;
+    if (x.back() == base && y <= x.size()) {
+        y = 0;
+        x.pop_back();
+    }
+    return mp(x, y);
+}
+
+void print(const state & v) {
+    cout << "SUMS\n";
+    for (auto a : v.x) {
+        cout << a << " ";
+    }
+    cout << "\n";
+    cout << "LAST " << v.y << "\n";
+}
+
+
+int ans;
+
+const int N = 3;
+
+int v[N];
+
+void check() {
+    int ok[N];
+    clr(ok);
+
+    for (int i = 0; i < N; ++i) {
+        for (int j = i + 1; j <= N; ++j) {
+            if (accumulate(v + i, v + j, 0) == base) {
+                for (int k = i; k < j; ++k) {
+                    ok[k] = 1;
+                }
+            }
+        }
+    }
+
+    if (accumulate(ok, ok + N, 0) != N) {
+        for (int i = 0; i < N; ++i) {
+            cout << v[i] << " ";
+        }
+        cout << "\n";
+        for (int i = 0; i < N; ++i) {
+            cout << ok[i] << " ";
+        }
+        cout << "\n";
+        assert(false);
+    }
+}
+
+void rec(int cnt, state s) {
+    if (cnt == N) {
+        if (accumulate(v, v + cnt, 0) != 0 && s.y == 0) check();
+        ans += s.y == 0;
+        return;
+    }
+    if (s.y > s.x.size()) {
+        return;
+    }
+    for (int i = 0; i < base; ++i) {
+        v[cnt] = i;
+        rec(cnt + 1, go(s, i));
+    }
+}
+
+ull a[3000][3000];
+ull b[3000][3000];
+ull ta[3000][3000];
+
+
+void test() {
+    long long a[2];
+    long long b[2];
+    clr(a);
+    clr(b);
+
+    a[0] = 1;
+    a[1] = 2;
+
+    b[0] = 3;
+    b[1] = 4;
+
+    __m128i X = _mm_load_si128((__m128i*)a);
+    __m128i Y = _mm_load_si128((__m128i*)b);
+
+    __m128i Z = _mm_mul_epi32(X, Y);
+
+    long long c[2];
+
+    _mm_store_si128((__m128i*)c, Z);
+
+    cout << c[0] << " " << c[1] << "\n";
+
+}
+
+void dot(const ull *a, const ull *b, int size, ull & c) {
+    __m512i res = _mm512_setzero_epi32()
+    for (int i = 0; i < size; i += 8) {
+
+    }
+}
+
+int main() {
+    //#define int long
+#ifdef LOCAL
+    freopen("input.txt", "r", stdin);
+    //freopen("output.txt", "w", stdout);
+#else
+#define fname "race"
+    //freopen(fname".in", "r", stdin);
+    //freopen(fname".out", "w", stdout);
+#endif
+
+//
+//    test();
+//    exit(0);
+
+    queue <state> q;
+    map <state, int> used;
+    q.push(mp(vector <int>(), 0));
+
+    int sz = 0;
+    used[mp(vector <int>(), 0)] = sz++;
+
+
+    while (!q.empty()) {
+        state v = q.front();
+        q.pop();
+//        cout << "SUMS ";
+//        for (auto u : v.x) {
+//            cout << u << " ";
+//        }
+//        cout << "\n";
+//        cout << "VAL " << v.y << "\n";
+//        if (v.y > 10) {
+//            break;
+//        }
+        for (int d = 0; d < base; ++d) {
+            state x = go(v, d);
+            if (x.y > x.x.size()) {
+                continue;
+            }
+            if (!used.count(x)) {
+                q.push(x);
+                used[x] = sz++;
+            }
+        }
+    }
+
+    sz = used.size();
+
+
+    clr(a);
+
+    for (const auto & z : used) {
+
+        for (int d = 0; d < base; ++d) {
+            auto v = go(z.x, d);
+            if (!used.count(v)) {
+                continue;
+            }
+            a[used[v]][z.y] += 1;
+//            cout << "a[" << used[v] << "][" << z.y << "] += 1" << "\n";
+        }
+    }
+
+    long long n = 1000000000ll * 1000000000ll;
+
+    ull res[sz];
+
+    ull tmp[sz];
+
+    clr(res);
+
+    res[0] = 1;
+
+    cout << ULLONG_MAX << endl;
+
+    ull many = 17 * mod * mod;
+
+    while (n) {
+        cerr << n << endl;
+        if (n & 1ll) {
+            clr(tmp);
+            for (int i = 0; i < sz; ++i) {
+                for (int j = 0; j < sz; ++j) {
+                    tmp[i] += a[i][j] * res[j];
+                    if (tmp[i] >= many) {
+                        tmp[i] -= many;
+                    }
+                }
+                tmp[i] %= mod;
+            }
+            memcpy(res, tmp, sizeof(res));
+        }
+
+        clr(b);
+
+        for (int i = 0; i < sz; ++i) {
+            for (int j = 0; j < sz; ++j) {
+                ta[i][j] = a[j][i];
+            }
+        }
+
+
+        n >>= 1;
+        if (!n) break;
+        for (int i = 0; i < sz; ++i)
+        for (int j = 0; j < sz; ++j) {
+            ull r = 0;
+            for (int k = 0; k < sz; ++k) {
+                r += a[i][k] * ta[j][k];
+                if (r >= many) {
+                    r -= many;
+                }
+            }
+            b[i][j] = r % mod;
+        }
+        memcpy(a, b, sizeof(a));
+
+    }
+
+    ull ans = 0;
+
+    for (const auto & z : used) {
+
+        if (z.x.y == 0 && !z.x.x.empty()) {
+            ans += res[z.y];
+        }
+    }
+
+    cout << ans % mod << "\n";
+
+
+
+
+//    for (const auto & z : used) {
+//
+//        for (int d = 0; d < base; ++d) {
+//            auto v = go(z.x, d);
+//            if (!used.count(v)) {
+//                continue;
+//            }
+//            cout << "a[" << used[v] << "][" << z.y << "] = 1" << "\n";
+//        }
+//    }
+
+
+
+//    state init = mp(vector <int>(), 0);
+//
+////    rec(0, init);
+////
+////    cout << ans << "\n";
+////    exit(0);
+//
+//
+//    for (int n = N; n <= N; ++n) {
+//        map <state, int> dp;
+//
+//
+////        for (int d = 1; d < base; ++d) {
+////            auto z = mp(vector <int>(1, d), 1);
+////            print(z);
+////            dp[z] = 1;
+////        }
+//
+//        dp[init] = 1;
+//
+//        for (int i = 0; i < n; ++i) {
+//            map <state, int> dp2;
+//            for (const auto & z : dp) {
+//                for (int d = 0; d < base; ++d) {
+//                    state v = go(z.x, d);
+//                    if (v.y > v.x.size())
+//                        continue;
+//                    dp2[v] += z.y;
+//                }
+//            }
+//            dp = dp2;
+////            if (i == 0) {
+////                for (const auto & t : dp) {
+////                    print(t.x);
+////                    cout << t.y << "\n";
+////                }
+////            }
+//        }
+//
+//        for (const auto & z : dp) {
+//            if (z.x.y == 0) {
+//                ans += z.y;
+//            }
+//        }
+//    }
+//
+//
+//
+//    cout << ans << "\n";
+
+#ifdef LOCAL
+    cerr << "Time elapsed: " << 1.0 * clock() / CLOCKS_PER_SEC * 1000 << " ms." << endl;
+#endif
+    return 0;
+}
