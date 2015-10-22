@@ -1,0 +1,230 @@
+#include <bits/stdc++.h>
+
+#define clr(x) memset((x), 0, sizeof(x))
+#define all(x) (x).begin(), (x).end()
+#define pb push_back
+#define mp make_pair
+#define in(x) int (x); input((x));
+#define x first
+#define y second
+typedef int itn;
+
+#define next next12345
+#define prev prev12345
+#define left lefdsf232
+#define right rig43783
+#define x1 x12345
+#define y1 y12345
+
+using namespace std;
+
+template<typename T>
+T gcd(T x, T y) {
+    while (y > 0) {
+        x %= y;
+        swap(x, y);
+    }
+    return x;
+}
+
+template<class _T>
+inline _T sqr(const _T &x) {
+    return x * x;
+}
+
+template<class _T>
+inline string tostr(const _T &a) {
+    ostringstream os("");
+    os << a;
+    return os.str();
+}
+
+typedef long double ld;
+typedef long long ll;
+typedef unsigned long long ull;
+typedef pair<int, int> PII;
+const long double PI = 3.1415926535897932384626433832795L;
+
+template<typename T>
+inline void input(T &a) {
+    static int ed;
+    a = 0;
+    while (!isdigit(ed = getchar()) && ed != '-') { }
+    char neg = 0;
+    if (ed == '-') {
+        neg = 1;
+        ed = getchar();
+    }
+    while (isdigit(ed)) {
+        a = 10 * a + ed - '0';
+        ed = getchar();
+    }
+    if (neg) a = -a;
+}
+
+template<typename T = int>
+inline T nxt() {
+    T res;
+    input(res);
+    return res;
+}
+
+mt19937 generator;
+
+bool check(int v) {
+    for (int i = 2; i * i <= v; ++i) {
+        if (v % i == 0) {
+            return false;
+        }
+    }
+    return true;
+}
+
+long long pw(long long a, long long n, long long m) {
+    ll res = 1;
+    while (n) {
+        if (n & 1ll) {
+            res = res * a % m;
+        }
+        a = a * a % m;
+        n >>= 1;
+    }
+    return res;
+}
+
+struct queueMax {
+
+    queueMax() {}
+
+    deque <int> q;
+
+    int max() {
+        return q.front();
+    }
+
+    void push(int x) {
+        while (!q.empty() && q.back() < x)
+            q.pop_back();
+        q.push_back (x);
+    }
+
+    void pop(int x) {
+        if (!q.empty() && q.front() == x)
+            q.pop_front();
+    }
+};
+
+const int N = sqrt(5e15) + 100;
+const int K = 100000;
+
+int lp[N];
+int mu[N];
+
+long long sf(long long n) {
+    long long res = 0;
+    for (long long d = 1; d * d <= n; ++d) {
+        res += mu[d] * (n / d / d);
+    }
+    return res;
+}
+
+vector <int> primes;
+vector <long long> pp;
+
+map <long long, long long> ans[5 * 1000 * 1000];
+
+long long solve2(long long n, int p) {
+//    while (p >= 0 && primes[p] * primes[p] > n) {
+//        --p;
+//    }
+//
+    p = upper_bound(pp.begin(), pp.begin() + p + 1, n) - pp.begin() - 1;
+    if (p < 0) {
+        return sf(n);
+    }
+    if (ans[p].count(n)) {
+        return ans[p][n];
+    }
+    long long cur = primes[p];
+    long long & res = ans[p][n] = solve2(n, p - 1);
+
+    long long sum = 0;
+    int d = 1;
+
+    while (1.0 * cur * primes[p] <= 1e16 && cur * primes[p] <= n) {
+        cur *= primes[p];
+        ++d;
+    }
+
+    while (d > 1) {
+        sum = solve2(n / cur, p - 1) - sum;
+        cur /= primes[p];
+        if (d % primes[p] == 0) {
+            res += cur * sum * primes[p];
+        } else {
+            res += cur * sum;
+        }
+        --d;
+    }
+
+    return res;
+}
+
+int main() {
+    //#define int long
+#ifdef LOCAL
+    freopen("input.txt", "r", stdin);
+    //freopen("output.txt", "w", stdout);
+#else
+#define fname "parts"
+    //freopen(fname".in", "r", stdin);
+    //freopen(fname".out", "w", stdout);
+#endif
+//    v[1] = 1;
+    mu[1] = 1;
+    for (int i = 2; i < N; ++i) {
+        if (!lp[i]) {
+            primes.push_back(i);
+            pp.push_back(1ll * i * i);
+            for (int j = i; j < N; j += i) {
+                lp[j] = i;
+            }
+        }
+        int u = i;
+        int k = 0;
+        int m = 1;
+        while (lp[u] == lp[i]) {
+            u /= lp[u];
+            m *= lp[i];
+            k++;
+        }
+        mu[i] = k == 1 ? -1 * mu[u] : 0;
+//        v[i] = v[u] * (m / lp[i]);
+    }
+
+    cerr << primes.size() << endl;
+
+    long long ans = 0;
+
+    long long n = 5000000000000000ll;//10000000000ll;
+
+    for (int i = 0; i < primes.size(); ++i) {
+        if (i % 10000 == 0) cerr << i << "\n";
+        solve2(n, i);
+    }
+
+    cout << solve2(n, primes.size() - 1) - 1 << "\n";
+
+//    for (int i = 1; i <= 1000; ++i) {
+//        cout << i << " " << solve1(i) << " " << solve2(i, (int)primes.size() - 1) << "\n";
+//    }
+
+
+
+
+
+#ifdef LOCAL
+    cerr << "Time elapsed: " << 1.0 * clock() / CLOCKS_PER_SEC * 1000 << " ms." << endl;
+#endif
+    return 0;
+}
