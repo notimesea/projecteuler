@@ -1,0 +1,291 @@
+#include <bits/stdc++.h>
+
+#define clr(x) memset((x), 0, sizeof(x))
+#define all(x) (x).begin(), (x).end()
+#define pb push_back
+#define mp make_pair
+#define in(x) int (x); input((x));
+#define x first
+#define y second
+typedef int itn;
+
+#define next next12345
+#define prev prev12345
+#define left lefdsf232
+#define right rig43783
+#define x1 x12345
+#define y1 y12345
+
+using namespace std;
+
+template<typename T>
+T gcd(T x, T y) {
+    while (y > 0) {
+        x %= y;
+        swap(x, y);
+    }
+    return x;
+}
+
+template<class _T>
+inline _T sqr(const _T &x) {
+    return x * x;
+}
+
+template<class _T>
+inline string tostr(const _T &a) {
+    ostringstream os("");
+    os << a;
+    return os.str();
+}
+
+typedef long double ld;
+typedef long long ll;
+typedef unsigned long long ull;
+typedef pair<int, int> PII;
+const long double PI = 3.1415926535897932384626433832795L;
+
+template<typename T>
+inline void input(T &a) {
+    static int ed;
+    a = 0;
+    while (!isdigit(ed = getchar()) && ed != '-') { }
+    char neg = 0;
+    if (ed == '-') {
+        neg = 1;
+        ed = getchar();
+    }
+    while (isdigit(ed)) {
+        a = 10 * a + ed - '0';
+        ed = getchar();
+    }
+    if (neg) a = -a;
+}
+
+template<typename T = int>
+inline T nxt() {
+    T res;
+    input(res);
+    return res;
+}
+
+mt19937 generator;
+
+bool check(int v) {
+    for (int i = 2; i * i <= v; ++i) {
+        if (v % i == 0) {
+            return false;
+        }
+    }
+    return true;
+}
+
+long long pw(long long a, long long n, long long m) {
+    ll res = 1;
+    while (n) {
+        if (n & 1ll) {
+            res = res * a % m;
+        }
+        a = a * a % m;
+        n >>= 1;
+    }
+    return res;
+}
+
+const int N = (int)sqrt(1.8e16);
+
+unordered_map <long long, long long> sqf;
+
+int s[N];
+int sf[N];
+long long s2[N];
+int lp[N];
+
+long long squareFree(long long up) {
+    if (up < N) {
+        return sf[up];
+    }
+    long long res = 0;
+    for (long long d = 1, d2 = 1; d2 <= up; d2 += 2 * d + 1, ++d) {
+        res += s[d] * up / d2;
+    }
+
+    return res;
+}
+
+int threads = 8;
+
+long long sum2omega(long long up) {
+
+    if (up < N) {
+        return s2[up];
+    }
+    long long res = 0;
+    long long d;
+    long long sf = 0;
+    vector <long long> c;
+    vector <long long> m;
+    c.reserve(2 * sqrt(up) + 1000);
+    m.reserve(2 * sqrt(up) + 1000);
+    c.push_back(0);
+    m.push_back(0);
+    for (d = 1; d * d < up; ++d) {
+        long long cur = d;
+        m.back() -= (up / cur);
+        c.push_back(cur);
+        m.push_back(up / cur);
+    }
+    if (d * d == up) {
+        long long cur = d;
+        m.back() -= (up / cur);
+        c.push_back(cur);
+        m.push_back(up / cur);
+    }
+    for (--d; d; --d) {
+        long long cur = up / d;
+        m.back() -= (up / cur);
+        c.push_back(cur);
+        m.push_back(up / cur);
+    }
+    for (int i = 0; i < m.size(); i += threads) {
+        if (c[i] < N) {
+            for (int j = i; j < m.size() && j < i + threads; ++j) {
+                res += squareFree(c[j]) * m[j];
+            }
+            continue;
+        }
+        if (i % 10000 == 0) cerr << c[i] << "\n";
+        vector <future <long long> > th;
+        th.reserve(threads);
+        for (int j = i; j < m.size() && j < i + threads; ++j) {
+            th.push_back(async(launch::async, squareFree, c[j]));
+        }
+        for (int j = 0; j < th.size(); ++j) {
+            res += th[j].get() * m[i + j];
+        }
+    }
+    return res;
+}
+
+int main() {
+    //#define int long
+#ifdef LOCAL
+    freopen("input.txt", "r", stdin);
+    //freopen("output.txt", "w", stdout);
+#else
+#define fname "parts"
+    //freopen(fname".in", "r", stdin);
+    //freopen(fname".out", "w", stdout);
+#endif
+
+//    for (int k = 1; k <= 1000; ++k) {
+//        //int k = 1000000000;
+//
+//        set <int> q;
+//
+//        for (int i = 1; i * i <= k; ++i) {
+//            q.insert(k / (i * i));
+//            //cout << k / i / i << ", ";
+//        }
+//        cerr << q.size() << ", ";
+//    }
+//
+//
+//    exit(0);
+
+    s[1] = 1;
+    s2[1] = 1;
+    for (int i = 2; i < N; ++i) {
+        if (lp[i] == 0) {
+            for (int j = i; j < N; j += i) {
+                lp[j] = i;
+            }
+        }
+        if (lp[i] == lp[i / lp[i]]) {
+            s[i] = 0;
+            s2[i] = s2[i / lp[i]];
+        } else {
+            s[i] = -1 * s[i / lp[i]];
+            s2[i] = 2 * s2[i / lp[i]];
+        }
+    }
+
+    for (int i = 1; i < N; ++i) {
+        sf[i] += sf[i - 1] + abs(s[i]);
+        s2[i] += s2[i - 1];
+    }
+
+//    for (int i = 1; i <= 10; ++i) {
+//        cout << s2[i] << " ";
+//    }
+//    cout << "\n";
+
+//    for (int n = 1; n <= 10; ++n) {
+        long long n = 1000000000000000ll;
+
+
+        long long ans = 0;
+
+
+        for (long long i = 1; i * i <= n; ++i) {
+            //if (i < 100 || i % 100 == 0) cerr << i << "\n";
+            ans += i * sum2omega(n / i / i);
+        }
+
+
+        cout << ans << "\n";
+//    }
+
+    //    long long ans2 = 0;
+//
+//    int fr = 0;
+//
+//    for (int i = 1; i <= n; ++i) {
+//        for (int j = 1; j <= i; ++j) {
+//            if (i % j == 0) {
+//                ans2 += gcd(j, i / j);
+//            }
+//        }
+//        int ok = 1;
+//        for (int j = 2; j * j <= i; ++j) {
+//            if (i % (j * j) == 0) {
+//                ok = 0;
+//                break;
+//            }
+//        }
+//        fr += ok;
+//        cerr << i << " " << squareFree(i) << " " << fr << "\n";
+//        assert(squareFree(i) == fr);
+//    }
+//    cout << ans2 << "\n";
+
+//
+//    vector <vector <int> > x(2, vector <int>(2));
+//    for (int i = 0; i < 2; ++i) {
+//        for (int j = 0; j < 2; ++j) {
+//            x[i][j] = nxt();
+//        }
+//        sort(all(x[i]));
+//    }
+//    sort(all(x));
+//
+//    do {
+//
+//        do {
+//            do {
+//                if (x[0][0] <= x[1][0] && x[0][1] <= x[1][1]) {
+//                    cout << "Yes\n";
+//                    return 0;
+//                }
+//            } while(next_permutation(all(x[1])));
+//        } while (next_permutation(all(x[0])));
+//
+//    } while (next_permutation(all(x)));
+//
+//    cout << "No\n";
+
+#ifdef LOCAL
+    cerr << "Time elapsed: " << 1.0 * clock() / CLOCKS_PER_SEC * 1000 << " ms." << endl;
+#endif
+    return 0;
+}
