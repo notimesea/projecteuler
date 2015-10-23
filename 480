@@ -1,0 +1,70 @@
+N = 16
+bin = [[0 for j in xrange(N)] for i in xrange(N)]
+
+for i in xrange(N):
+    bin[i][0] = 1
+    for j in xrange(1, i + 1):
+        bin[i][j] = bin[i - 1][j] + bin[i - 1][j - 1]
+
+def count(data, len):
+    dp = [0 for i in xrange(len + 1)]
+    dp[0] = 1
+    for v in data.itervalues():
+        for i in xrange(len, -1, -1):
+            for j in xrange(1, min(v, len - i) + 1):
+                dp[i + j] += dp[i] * bin[i + j][j]
+    return sum(dp)
+
+def wordById(id, len, data):
+    if id == 0:
+        return ""
+    id -= 1
+    for k in sorted(data.keys()):
+        if data[k] == 0:
+            continue
+        data[k] -= 1
+        cnt = count(data, len - 1)
+        if cnt > id:
+            res = k + wordById(id, len - 1, data)
+            data[k] += 1
+            return res
+        else:
+            id -= cnt
+        data[k] += 1
+    assert False
+
+def idByWord(word, len, data):
+    if word == "":
+        return 0
+    id = 1
+    for k in sorted(data.keys()):
+        if data[k] == 0:
+            continue
+        if k < word[0]:
+            data[k] -= 1
+            id += count(data, len - 1)
+            data[k] += 1
+        else:
+            data[k] -= 1
+            id += idByWord(word[1:], len - 1, data)
+            data[k] += 1
+            return id
+
+
+if __name__ == "__main__":
+
+    s = "thereisasyetinsufficientdataforameaningfulanswer"
+    data = {}
+    for c in s:
+        if c in data:
+            data[c] += 1
+        else:
+            data[c] = 1
+
+    def W(id):
+        return wordById(id, 15, data)
+
+    def P(word):
+        return idByWord(word, 15, data)
+
+    print W(P("legionary") + P("calorimeters") - P("annihilate") + P("orchestrated") - P("fluttering"))
