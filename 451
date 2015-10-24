@@ -1,0 +1,219 @@
+#include <bits/stdc++.h>
+
+#define clr(x) memset((x), 0, sizeof(x))
+#define all(x) (x).begin(), (x).end()
+#define pb push_back
+#define mp make_pair
+#define in(x) int (x); input((x));
+#define x first
+#define y second
+typedef int itn;
+
+#define next next12345
+#define prev prev12345
+#define left lefdsf232
+#define right rig43783
+#define x1 x12345
+#define y1 y12345
+
+using namespace std;
+
+template<typename T>
+T gcd(T x, T y) {
+    while (y > 0) {
+        x %= y;
+        swap(x, y);
+    }
+    return x;
+}
+
+template<class _T>
+inline _T sqr(const _T &x) {
+    return x * x;
+}
+
+template<class _T>
+inline string tostr(const _T &a) {
+    ostringstream os("");
+    os << a;
+    return os.str();
+}
+
+typedef long double ld;
+typedef long long ll;
+typedef unsigned long long ull;
+typedef pair<int, int> PII;
+const long double PI = 3.1415926535897932384626433832795L;
+
+template<typename T>
+inline void input(T &a) {
+    static int ed;
+    a = 0;
+    while (!isdigit(ed = getchar()) && ed != '-') { }
+    char neg = 0;
+    if (ed == '-') {
+        neg = 1;
+        ed = getchar();
+    }
+    while (isdigit(ed)) {
+        a = 10 * a + ed - '0';
+        ed = getchar();
+    }
+    if (neg) a = -a;
+}
+
+template<typename T = int>
+inline T nxt() {
+    T res;
+    input(res);
+    return res;
+}
+
+mt19937 generator;
+
+bool check(int v) {
+    for (int i = 2; i * i <= v; ++i) {
+        if (v % i == 0) {
+            return false;
+        }
+    }
+    return true;
+}
+
+long long pw(long long a, long long n, long long m) {
+    ll res = 1;
+    while (n) {
+        if (n & 1ll) {
+            res = res * a % m;
+        }
+        a = a * a % m;
+        n >>= 1;
+    }
+    return res;
+}
+
+const int N = 20 * 1000 * 1000 + 1;
+
+int lp[N];
+
+int mul_inv(int a, int b)
+{
+    int b0 = b, t, q;
+    int x0 = 0, x1 = 1;
+    if (b == 1) return 1;
+    while (a > 1) {
+        q = a / b;
+        t = b, b = a % b, a = t;
+        t = x0, x0 = x1 - q * x0, x1 = t;
+    }
+    if (x1 < 0) x1 += b0;
+    return x1;
+}
+
+const int K = 100;
+int invs[K];
+
+void calc_invs(int *n, int len) {
+    int p, i, prod = 1, sum = 0;
+    for (i = 0; i < len; i++) prod *= n[i];
+    for (i = 0; i < len; i++) {
+        p = prod / n[i];
+        invs[i] = mul_inv(p, n[i]);
+    }
+}
+
+int chinese_remainder(int *n, int *a, int len) {
+    int p, i, prod = 1;
+    long long sum = 0;
+    for (i = 0; i < len; i++) prod *= n[i];
+    for (i = 0; i < len; i++) {
+        p = prod / n[i];
+        sum += 1ll * a[i] * invs[i] * p;
+    }
+    return (int)(sum % prod);
+}
+
+int main() {
+    //#define int long
+#ifdef LOCAL
+    freopen("input.txt", "r", stdin);
+    //freopen("output.txt", "w", stdout);
+#else
+    #define fname "parts"
+    //freopen(fname".in", "r", stdin);
+    //freopen(fname".out", "w", stdout);
+#endif
+
+//    int md = 8;
+//    for (int i = 1; i < md; ++i) {
+//        if ((i * i) % md == 1) {
+//            cerr << i << " " << (i * i) % md << "\n";
+//        }
+//    }
+//    exit(0);
+
+    int powers[K];
+    int mods[K];
+
+    long long ans = 0;
+
+    for (int i = 2; i < N; ++i) {
+        if (!lp[i]) {
+            for (int j = i; j < N; j += i) {
+                lp[j] = i;
+            }
+        }
+        if (i > 2) {
+            int x = i;
+            int sz = 0;
+            while (x > 1) {
+                powers[sz] = 1;
+                int l = lp[x];
+                while (lp[x] == l) {
+                    powers[sz] *= l;
+                    x /= lp[x];
+                }
+                sz++;
+            }
+            assert(sz < K);
+            int res = 0;
+
+            calc_invs(powers, sz);
+            if (powers[sz - 1] % 4 == 0) {
+                int m[] = {1, powers[sz - 1] / 2 - 1, powers[sz - 1] / 2 + 1, powers[sz - 1] - 1};
+                for (int d = 0; d < 4; ++d) {
+                    for (int mask = 0; mask < (1 << (sz - 1)); ++mask) {
+                        for (int j = 0; j + 1 < sz; ++j) {
+                            mods[j] = (mask & (1 << j)) ? 1 : (powers[j] - 1);
+                        }
+                        mods[sz - 1] = m[d];
+                        int q = chinese_remainder(powers, mods, sz);
+                        assert(1ll * q * q % i == 1);
+                        if (q != i - 1) res = max(res, q);
+                    }
+                }
+            } else {
+                for (int mask = 0; mask < (1 << sz); ++mask) {
+                    for (int j = 0; j < sz; ++j) {
+                        mods[j] = (mask & (1 << j)) ? 1 : (powers[j] - 1);
+                    }
+                    int q = chinese_remainder(powers, mods, sz);
+                    assert(1ll * q * q % i == 1);
+                    if (q != i - 1) res = max(res, q);
+                }
+            }
+
+
+            if (i <= 100) {
+                cerr << i << " " << res << "\n";
+            }
+            ans += res;
+        }
+    }
+    cout << ans << "\n";
+
+#ifdef LOCAL
+    cerr << "Time elapsed: " << 1.0 * clock() / CLOCKS_PER_SEC * 1000 << " ms." << endl;
+#endif
+    return 0;
+}
