@@ -1,0 +1,200 @@
+#include <bits/stdc++.h>
+
+#define clr(x) memset((x), 0, sizeof(x))
+#define all(x) (x).begin(), (x).end()
+#define pb push_back
+#define mp make_pair
+#define in(x) int (x); input((x));
+#define x first
+#define y second
+typedef int itn;
+
+#define next next12345
+#define prev prev12345
+#define left lefdsf232
+#define right rig43783
+#define x1 x12345
+#define y1 y12345
+
+using namespace std;
+
+template<typename T>
+T gcd(T x, T y) {
+    while (y > 0) {
+        x %= y;
+        swap(x, y);
+    }
+    return x;
+}
+
+template<class _T>
+inline _T sqr(const _T &x) {
+    return x * x;
+}
+
+template<class _T>
+inline string tostr(const _T &a) {
+    ostringstream os("");
+    os << a;
+    return os.str();
+}
+
+typedef long double ld;
+typedef long long ll;
+typedef unsigned long long ull;
+typedef pair<int, int> PII;
+const long double PI = 3.1415926535897932384626433832795L;
+
+template<typename T>
+inline void input(T &a) {
+    static int ed;
+    a = 0;
+    while (!isdigit(ed = getchar()) && ed != '-') { }
+    char neg = 0;
+    if (ed == '-') {
+        neg = 1;
+        ed = getchar();
+    }
+    while (isdigit(ed)) {
+        a = 10 * a + ed - '0';
+        ed = getchar();
+    }
+    if (neg) a = -a;
+}
+
+template<typename T = int>
+inline T nxt() {
+    T res;
+    input(res);
+    return res;
+}
+
+mt19937 generator;
+
+bool check(int v) {
+    for (int i = 2; i * i <= v; ++i) {
+        if (v % i == 0) {
+            return false;
+        }
+    }
+    return true;
+}
+
+long long pw(long long a, long long n, long long m) {
+    ll res = 1;
+    while (n) {
+        if (n & 1ll) {
+            res = res * a % m;
+        }
+        a = a * a % m;
+        n >>= 1;
+    }
+    return res;
+}
+
+vector <int> primes;
+
+int mul[5000][5000];
+int id[100000];
+
+int main() {
+    //#define int long
+#ifdef LOCAL
+    freopen("input.txt", "r", stdin);
+    //freopen("output.txt", "w", stdout);
+#else
+#define fname "parts"
+    //freopen(fname".in", "r", stdin);
+    //freopen(fname".out", "w", stdout);
+#endif
+
+    int n = 1000000;
+    for (int i = 2; i <= n; ++i) {
+        if (check(i)) {
+            primes.push_back(i);
+        }
+    }
+    int mod = 100000;
+    int res = 65432;
+    int g = gcd(mod, res);
+    mod /= g;
+    res /= g;
+
+    vector <int> inter;
+
+    memset(id, 255, sizeof(id));
+
+    for (int i = 0; i < mod; ++i) {
+//        inter.push_back(i);
+        if (i % 2 != 0 && i % 5 != 0) {
+            id[i] = (int)inter.size();
+            inter.push_back(i);
+        }
+    }
+
+    for (int i = 0; i < (int)inter.size(); ++i) {
+        for (int j = 0; j < (int)inter.size(); ++j) {
+            mul[i][j] = id[inter[i] * inter[j] % mod];
+        }
+    }
+
+    long long m = 10000000000000000ll + 61;
+
+    int used[inter.size()];
+    clr(used);
+    int cnt[inter.size()];
+
+    long long ans[inter.size()];
+    clr(ans);
+    ans[id[1]] = 1;
+
+    long long x = 1;
+    //-5174874456812343
+
+
+    long long tmp[inter.size()];
+
+    for (int p : primes) {
+        if (p == 2 || p == 5) continue;
+        int k = n;
+        int deg = 0;
+        while (k >= p) {
+            k /= p;
+            deg += k;
+        }
+        x *= deg + 1;
+        long long cur = 1;
+        clr(cnt);
+        for (int i = 0; i <= deg; ++i) {
+            cnt[id[cur]]++;
+            cur = cur * p % mod;
+        }
+        clr(tmp);
+        for (int i = 0; i < (int)inter.size(); ++i) {
+            if (!cnt[i]) continue;
+            for (int j = 0; j < (int)inter.size(); ++j) {
+                if (!ans[j]) continue;
+                if (1.0 * ans[j] * cnt[i] > 8e18) {
+                    cerr << ans[j] << " " << cnt[i] << endl;
+                    return 0;
+                }
+                tmp[mul[i][j]] += ans[j] * cnt[i];
+                tmp[mul[i][j]] %= m;
+            }
+        }
+        memcpy(ans, tmp, sizeof(ans));
+    }
+//    cout << x << " " << accumulate(ans, ans + mod, 0ll) << "\n";
+//
+//    for (int i = 0; i < mod; ++i) {
+//        cout << ans[i] << " ";
+//    }
+//    cout << "\n";
+//    cout << z << "\n";
+    cout << ans[id[res]] << "\n";
+
+#ifdef LOCAL
+    cerr << "Time elapsed: " << 1.0 * clock() / CLOCKS_PER_SEC * 1000 << " ms." << endl;
+#endif
+    return 0;
+}
