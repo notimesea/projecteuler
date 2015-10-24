@@ -1,0 +1,10 @@
+def f(n):
+    if n%10==0: return 0
+    pw = n
+    while 1:
+        pw2 = pow(n,pw,1000000000)
+        if pw2 == pw:
+            return pw
+        pw = pw2
+
+print sum(map(f, range(2,1000001)))
