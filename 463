@@ -1,0 +1,345 @@
+#include <bits/stdc++.h>
+
+#define clr(x) memset((x), 0, sizeof(x))
+#define all(x) (x).begin(), (x).end()
+#define pb push_back
+#define mp make_pair
+#define in(x) int (x); input((x));
+#define x first
+#define y second
+typedef int itn;
+
+#define next next12345
+#define prev prev12345
+#define left lefdsf232
+#define right rig43783
+#define x1 x12345
+#define y1 y12345
+
+using namespace std;
+
+template<typename T>
+T gcd(T x, T y) {
+    while (y > 0) {
+        x %= y;
+        swap(x, y);
+    }
+    return x;
+}
+
+template<class _T>
+inline _T sqr(const _T &x) {
+    return x * x;
+}
+
+template<class _T>
+inline string tostr(const _T &a) {
+    ostringstream os("");
+    os << a;
+    return os.str();
+}
+
+typedef long double ld;
+typedef long long ll;
+typedef unsigned long long ull;
+typedef pair<int, int> PII;
+const long double PI = 3.1415926535897932384626433832795L;
+
+template<typename T>
+inline void input(T &a) {
+    static int ed;
+    a = 0;
+    while (!isdigit(ed = getchar()) && ed != '-') { }
+    char neg = 0;
+    if (ed == '-') {
+        neg = 1;
+        ed = getchar();
+    }
+    while (isdigit(ed)) {
+        a = 10 * a + ed - '0';
+        ed = getchar();
+    }
+    if (neg) a = -a;
+}
+
+template<typename T = int>
+inline T nxt() {
+    T res;
+    input(res);
+    return res;
+}
+
+mt19937 generator;
+
+bool check(int v) {
+    for (int i = 2; i * i <= v; ++i) {
+        if (v % i == 0) {
+            return false;
+        }
+    }
+    return true;
+}
+
+long long pw(long long a, long long n, long long m) {
+    ll res = 1;
+    while (n) {
+        if (n & 1ll) {
+            res = res * a % m;
+        }
+        a = a * a % m;
+        n >>= 1;
+    }
+    return res;
+}
+
+long long mod = 1000000000;
+
+struct data {
+    long long p0;
+    long long x0;
+    long long y0;
+    long long z0;
+
+    long long p1;
+    long long x1;
+    long long y1;
+    long long z1;
+
+    data() {
+        x0 = y0 = z0 = p0 = 0;
+        x1 = y1 = z1 = p1 = 0;
+    }
+
+    void norm() {
+        p0 %= mod, x0 %= mod, y0 %= mod, z0 %= mod;
+        p1 %= mod, x1 %= mod, y1 %= mod, z1 %= mod;
+    }
+
+    data move() {
+        data res;
+        //00
+        res.p0 += y0;
+        res.x0 += z0;
+        res.y0 += y0;
+        res.z0 += 2 * z0 - y0;
+
+        //01
+        res.p1 += y0;
+        res.x1 += z0;
+        res.y1 += 2 * x0 - p0;
+        res.z1 += 3 * z0 - 2 * y0;
+
+        //10
+
+        res.p0 += y1;
+        res.x0 += z1;
+        res.y0 += y1;
+        res.z0 += 2 * z1 - y1;
+
+        //11
+
+        res.p1 += y1;
+        res.x1 += z1;
+        res.y1 += 3 * x1 - 2 * p1;
+        res.z1 += 3 * z1 - 2 * y1;
+
+        res.norm();
+
+        return res;
+    }
+
+    data move(int bit) {
+        if (bit == 0) {
+            data res;
+            //00
+            res.p0 += y0;
+            res.x0 += z0;
+            res.y0 += y0;
+            res.z0 += 2 * z0 - y0;
+
+            //10
+
+            res.p0 += y1;
+            res.x0 += z1;
+            res.y0 += y1;
+            res.z0 += 2 * z1 - y1;
+
+            res.norm();
+
+            return res;
+        } else {
+            data res;
+            //01
+            res.p1 += y0;
+            res.x1 += z0;
+            res.y1 += 2 * x0 - p0;
+            res.z1 += 3 * z0 - 2 * y0;
+
+
+            //11
+            res.p1 += y1;
+            res.x1 += z1;
+            res.y1 += 3 * x1 - 2 * p1;
+            res.z1 += 3 * z1 - 2 * y1;
+
+            res.norm();
+            return res;
+        }
+    }
+};
+
+const int k = 200;
+int res[k];
+
+data init[4];
+
+void test() {
+
+    res[1] = 1;
+    res[2] = 1;
+    res[3] = 3;
+    for (int i = 4; i < k; ++i) {
+        if (i % 2 == 0) {
+            res[i] = res[i / 2];
+        } else {
+            int x = i / 4;
+            if (i % 4 == 1) {
+                res[i] = 2 * res[2 * x + 1] - res[x];
+            } else {
+                res[i] = 3 * res[2 * x + 1] - 2 * res[x];
+            }
+        }
+    }
+
+    for (int v = 2; v < 4; ++v) {
+        for (int len = 0; len <= 5; ++len) {
+            int l = v << len;
+            int r = (v << len) + (1 << len);
+
+            int need = accumulate(res + l, res + r, 0);
+
+            data cur = init[v];
+
+            for (int i = 0; i < len; ++i) {
+                cur = cur.move();
+            }
+
+            int get = cur.y0 + cur.y1;
+
+            assert(need == get);
+
+            //cerr << len << " " << need << " " << get << endl;
+        }
+    }
+
+//    cout << accumulate(res + 1, res + 9, 0) << "\n";
+//    cout << accumulate(res + 1, res + 101, 0) << "\n";
+//
+//    for (int i = 1; i < k; ++i) {
+//        cout << i << " " << res[i] << "\n";
+//    }
+}
+
+
+void pre() {
+    init[2].p0 = 1;
+    init[2].x0 = 3;
+    init[2].y0 = 1;
+    init[2].z0 = 5;
+
+    init[3].p1 = 1;
+    init[3].x1 = 3;
+    init[3].y1 = 3;
+    init[3].z1 = 7;
+}
+
+long long solveLen(int x) {
+    if (x == 0) {
+        return 0;
+    }
+    if (x == 1) {
+        return 1;
+    }
+    long long res = 1;
+    for (int v = 2; v < 4; ++v) {
+        data cur = init[v];
+        for (int len = 0; len <= x - 2; ++len) {
+            res += cur.y0 + cur.y1;
+            cur = cur.move();
+        }
+    }
+    res %= mod;
+    return res;
+}
+
+long long solve(data st, int len) {
+    for (int i = 0; i < len; ++i) {
+        st = st.move();
+    }
+    return (st.y0 + st.y1) % mod;
+}
+
+long long solve(long long x) {
+    if (x == 1) {
+        return 0;
+    }
+    if (x == 2) {
+        return 1;
+    }
+    if (x == 3) {
+        return 2;
+    }
+    vector <int> bits;
+    while (x) {
+        bits.push_back(x % 2);
+        x /= 2;
+    }
+    reverse(all(bits));
+    long long res = solveLen(bits.size() - 1);
+//    cerr << res << "\n";
+    data st;
+
+    if (bits[1] == 1) {
+        res += solve(init[2], bits.size() - 2);
+        st = init[3];
+    } else {
+        st = init[2];
+    }
+
+    for (int i = 2; i < bits.size(); ++i) {
+        if (bits[i] == 1) {
+            res += solve(st.move(0), bits.size() - i - 1);
+        }
+        st = st.move(bits[i]);
+    }
+    res %= mod;
+    return res;
+}
+
+int main() {
+    //#define int long
+#ifdef LOCAL
+    freopen("input.txt", "r", stdin);
+    //freopen("output.txt", "w", stdout);
+#else
+#define fname "parts"
+    //freopen(fname".in", "r", stdin);
+    //freopen(fname".out", "w", stdout);
+#endif
+
+    pre();
+    test();
+
+    long long x = pw(3, 37, 1ll << 60) + 1;
+
+//    int v = 140;
+
+    //cerr << solve(v) << " " << accumulate(res, res + v, 0) << "\n";
+
+    cout << (solve(x) + mod) % mod << "\n";
+
+#ifdef LOCAL
+    cerr << "Time elapsed: " << 1.0 * clock() / CLOCKS_PER_SEC * 1000 << " ms." << endl;
+#endif
+    return 0;
+}
