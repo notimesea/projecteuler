@@ -1,0 +1,37 @@
+from sympy.ntheory import factorint
+from collections import Counter
+import sys
+
+n = 10**7
+
+ans = 0
+
+mod = 1000000007
+
+threads = 8
+
+begin = int(sys.argv[1])
+
+for i in xrange(begin, n + 1, threads):
+    if i % 1000 == 0:
+        print i
+    f = Counter(factorint(i**2-2*i+2))
+    g = Counter(factorint(i**2+2*i+2))
+    h = f + g
+    x = 1
+    for k in h:
+        x *= k**h[k] + 1
+    ans += x - i**4 - 4
+    ans %= mod
+
+with open(str(begin) + ".ans", "w") as res:
+    print >>res, ans
+
+print ans
+
+if False:
+    for i in xrange(1, threads + 1):
+        with open(str(i) + ".ans") as res:
+            ans += int(res.readline())
+    
+    print ans % mod
