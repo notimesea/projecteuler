@@ -1,0 +1,103 @@
+from math import sqrt
+import sys
+
+sys.setrecursionlimit(5000)
+
+arr = []
+
+last = 1
+pointer = 0
+colored = 0
+
+count = 0
+
+
+def sqrtint(n):
+    k = int(sqrt(n))
+    while k * k > n:
+        k -= 1
+    while (k + 1) * (k + 1) <= n:
+        k += 1
+    return k
+
+
+for i in xrange(1000000):
+    if pointer < len(arr) and sqrtint(arr[pointer]) == colored:
+        arr.append(arr[pointer])
+        pointer += 1
+        colored = 0
+        count += 1
+    else:
+        arr.append(last)
+        colored += 1
+        last += 1
+
+sqrtsum = [sqrtint(arr[i]) for i in xrange(len(arr))]
+ssum = [arr[i] for i in xrange(len(arr))]
+
+for i in xrange(1, len(arr)):
+    sqrtsum[i] += sqrtsum[i - 1]
+    ssum[i] += ssum[i - 1]
+
+count = []
+
+mem = {}
+
+
+def sqrt_sum(n):
+    k = sqrtint(n)
+    return k * (6 * n - (2 * k + 5) * (k - 1)) / 6
+
+
+def get_sqrtsum(n):
+    if n == 0:
+        return 0
+    if n <= len(arr):
+        return sqrtsum[n - 1]
+    if n in mem:
+        return mem[n]
+    l, r = 1, n
+    while l < r:
+        m = (l + r) / 2
+        s = get_sqrtsum(m)
+        if s + m <= n:
+            l = m + 1
+        else:
+            r = m
+
+    assert get_sqrtsum(l) + l > n
+    assert get_sqrtsum(l - 1) + l - 1 <= n
+    z = l - 1
+    res = sqrt_sum(n - z) + get_sqrtsum(z)
+    mem[n] = res
+    return res
+
+
+def sum(n):
+    return n * (n + 1) / 2
+
+
+def get_sum(n):
+    if n == 0:
+        return 0
+    if n <= len(arr):
+        return ssum[n - 1]
+
+    l, r = 1, n
+    while l < r:
+        m = (l + r) / 2
+        s = get_sqrtsum(m)
+        if s + m <= n:
+            l = m + 1
+        else:
+            r = m
+    assert get_sqrtsum(l) + l > n
+    assert get_sqrtsum(l - 1) + l - 1 <= n
+    z = l - 1
+    return get_sum(z) + sum(n - z)
+
+
+ans = get_sum(10 ** 18)
+
+print ans
+print ans % 10 ** 9
