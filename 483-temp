@@ -43,7 +43,7 @@ typedef long double ld;
 typedef long long ll;
 typedef unsigned long long ull;
 typedef pair<int, int> PII;
-const long double PI = 3.1415926535897932384626433832795L;
+const ld PI = 3.1415926535897932384626433832795L;
 
 template<typename T>
 inline void input(T &a) {
@@ -96,40 +96,241 @@ long long lcm(long long a, long long b) {
     return a / gcd(a, b) * b;
 }
 
-const int N = 300;
+vector <int> primes;
 
 long long res = 0;
 
-double ans = 0;
+vector <int> degrees;
 
-double fact[N + 1];
+#define ld __float128
 
-double lg[N + 1];
+ld f(ld i) {
+    return i * i;
+}
 
-long long cnt = 0;
+int n;
 
-void rec(int r, int prev, long long l, double s, int k) {
-//    if (r < N / 2 && k == 1) {
-//        ++res;
-//        return;
-//    }
-    //if (s < -30) return;
-    if (cnt > 1e9) return;
-    if (r == 0) {
-        if (cnt % 1000000 == 0) {
-            cerr << cnt << "\n";
-        }
-        ++cnt;
-        ans += 1.0 * l * l * exp(s);
+inline void gen_divisors(int pos, int cur, vector <int> &divisors, const vector <int> &dd) {
+    while (pos < primes.size() && !dd[pos]) {
+        ++pos;
+    }
+    if (pos == primes.size()) {
+        divisors.push_back(cur);
         return;
     }
+    for (int d = 0; d <= dd[pos] && cur <= n; ++d) {
+        gen_divisors(pos + 1, cur, divisors, dd);
+        cur *= primes[pos];
+    }
+}
 
-    for (int i = prev + 1; i <= r; ++i) {
-        rec(r - i, i, lcm(l, i), s - lg[i], 1);
+ld solve(vector <int> degrees) {
+    vector <int> divs;
+    gen_divisors(0, 1, divs, degrees);
+    sort(all(divs));
+
+    vector <ld> p(n + 1);
+    p[0] = 1;
+    for (int i = 1; i <= n; ++i) {
+        for (int x : divs) {
+            if (x > i) break;
+            p[i] += p[i - x];
+        }
+        p[i] /= i;
+    }
+    return p[n];
+}
+
+const int M = 100000007;//200000033;
+
+__int128_t seed;
+
+struct summ {
+    ld ans = 0;
+    vector <ld> nums;
+
+    ld clear() {
+        sort(all(nums), [](const ld &l, const ld &r) {
+            return fabsl(l) < fabsl(r);
+        });
+        ld res = accumulate(all(nums), ld());
+        nums.clear();
+        return res;
     }
 
-    if (prev <= r) {
-        rec(r - prev, prev, lcm(l, prev), s - lg[prev] - lg[k + 1], k + 1);
+    void add(const ld &x) {
+        nums.push_back(x);
+    }
+
+} ss;
+
+struct myMap {
+    __int128_t keys[M];
+    ld values[M];
+//    ld values2[M];
+
+    myMap() {
+        clr(keys);
+        clr(values);
+//        clr(values2);
+    }
+
+    ld get(__int128_t key) {
+        key ^= seed;
+        int pos = key % M;
+        while (keys[pos] != key) {
+            pos += 17;
+            if (pos >= M) {
+                pos -= M;
+            }
+        }
+        return values[pos];
+    }
+
+//    ld get2(__int128_t key) {
+//        key ^= seed;
+//        int pos = key % M;
+//        while (keys[pos] != key) {
+//            pos += 17;
+//            if (pos >= M) {
+//                pos -= M;
+//            }
+//        }
+//        return values2[pos];
+//    }
+
+    void put(__int128_t key, const ld &value) {
+        key ^= seed;
+        int pos = key % M;
+        while (keys[pos] && keys[pos] != key) {
+            pos += 17;
+            if (pos >= M) {
+                pos -= M;
+            }
+        }
+        keys[pos] = key;
+        values[pos] = value;
+    }
+
+//    void add(__int128_t key, const ld &value) {
+//        key ^= seed;
+//        int pos = key % M;
+//        while (keys[pos] != key) {
+//            pos += 17;
+//            if (pos >= M) {
+//                pos -= M;
+//            }
+//        }
+//        values2[pos] += value;
+//    }
+};
+
+myMap st;
+
+void gen_divisors(int pos, __int128_t cur, int mul, vector <int> & degs, summ &z) {
+    while (pos < primes.size() && !degs[pos]) {
+        ++pos;
+    }
+    if (pos == primes.size()) {
+        z.add(st.get(cur) * (mul ? -1 : 1));
+        return;
+    }
+    gen_divisors(pos + 1, cur / primes[pos], mul ^ 1, degs, z);
+    gen_divisors(pos + 1, cur, mul, degs, z);
+}
+
+ld ans = 0;
+
+int cnt = 0;
+
+struct pool {
+    queue <pair <__int128_t, future<ld> > > t;
+
+    void pop() {
+        auto & v = t.front();
+        v.y.wait();
+        st.put(v.x, v.y.get());
+        t.pop();
+    }
+
+    void clear() {
+        while (!t.empty()) {
+            pop();
+        }
+    }
+
+    void add(__int128_t x, const vector <int> &degs) {
+        if (t.size() == 16) {
+            pop();
+        }
+        t.emplace(x, std::async(std::launch::async, solve, degs));
+    }
+} p;
+
+
+ld solve2(__int128_t s, vector <int> degs) {
+    summ z;
+    gen_divisors(0, s, 0, degs, z);
+    return z.clear();
+}
+
+const int T = 1000000;
+
+summ glob;
+
+struct pool2 {
+    queue <pair <__int128_t, future<ld> > > t;
+
+    void pop() {
+        auto & v = t.front();
+        v.y.wait();
+        glob.add(f(v.x) * v.y.get());
+//        st.add(v.x, v.y.get());
+//        ss.add(f(v.x) * v.y.get());
+//        ans += f(v.x) * v.y.get();
+        t.pop();
+    }
+
+    void clear() {
+        while (!t.empty()) {
+            pop();
+        }
+    }
+
+    void add(__int128_t x, const vector <int> &degs) {
+        if (t.size() == 16) {
+            pop();
+        }
+        t.emplace(x, std::async(std::launch::async, solve2, x, degs));
+    }
+} p2;
+
+
+void rec(int pos, int s, __int128_t v, int ph) {
+    if (pos == primes.size()) {
+
+        if (ph == 0) {
+            p.add(v, degrees);
+        }
+        if (ph == 1) {
+            p2.add(v, degrees);
+        }
+//        if (ph == 2) {
+//            ans += f(v) * st.get2(v);
+//        }
+        if (++cnt % 10000 == 0) {
+            cout << cnt << "\n";
+        }
+        return;
+    }
+    degrees[pos] = 0;
+    rec(pos + 1, s, v, ph);
+
+    int cur = primes[pos];
+    while (cur <= s) {
+        degrees[pos]++;
+        rec(pos + 1, s - cur, v * cur, ph);
+        cur *= primes[pos];
     }
 }
 
@@ -139,61 +340,36 @@ int main() {
     freopen("input.txt", "r", stdin);
     //freopen("output.txt", "w", stdout);
 #else
-#define fname "parts"
+    #define fname "parts"
     //freopen(fname".in", "r", stdin);
     //freopen(fname".out", "w", stdout);
 #endif
 
-    //5933760.8233363666
-
-    fact[0] = 0;
-
-    for (int i = 1; i <= N; ++i) {
-        fact[i] = fact[i - 1] + log(i);
-        lg[i] = log(i);
+    for (int i = 0; i < 100; ++i) {
+        seed = seed * 2 + rand() % 2;
     }
 
-    rec(N, 1, 1, 0, 0);
+    n = 350;
+    int MAGIC = 500000;
 
-    cout << setprecision(10) << fixed;
-
-    cout << ans << "\n";
-
-    exit(0);
-
-//    cout << res << "\n";
-
-//    return 0;
-
-    unordered_map <long long, double> dp[N + 1];
-
-    dp[0][1] = 1;
-
-    //100000
-
-//    cout << fact[N] << "\n";
-
-    for (int i = 0; i < N; ++i) {
-        cerr << i << "\n";
-        long long mx = 0;
-        for (int k = 1; k + i <= N; ++k) {
-            double ways = exp(fact[N - i - 1] - fact[N - i - k] - fact[k + i] + fact[i]);
-            for (const auto & x : dp[i]) {
-                mx = max(mx, x.x);
-                if (x.y < 1e-30) continue;
-                dp[i + k][lcm(x.x, k)] += ways * x.y;
-            }
+    for (int i = 2; i <= n; ++i) {
+        if (check(i)) {
+            primes.push_back(i);
+            degrees.push_back(0);
         }
-        cerr << dp[i].size() << " " << mx << "\n";
-        dp[i].clear();
     }
-    long double ans = 0;
-    for (const auto & x : dp[N]) {
-        ans += sqr(x.x) * x.y;
-    }
-//    ans /= fact[N];
-    printf("%.9Le", ans);
-//    cout << ans << "\n";
+
+    rec(0, n, 1, 0);
+    p.clear();
+    cnt = 0;
+    rec(0, n, 1, 1);
+    p2.clear();
+    ss.clear();
+
+    ans = glob.clear();
+
+    printf("%.9e", (double)ans);
+
 
 #ifdef LOCAL
     cerr << "Time elapsed: " << 1.0 * clock() / CLOCKS_PER_SEC * 1000 << " ms." << endl;
