@@ -1,0 +1,123 @@
+from sympy import GF, Poly, ZZ
+from sympy.polys.galoistools import *
+from collections import Counter
+import sys
+
+sys.setrecursionlimit(5000)
+
+m = 18
+n = 1900
+
+def egcd(a, b):
+    if a == 0:
+        return (b, 0, 1)
+    else:
+        g, y, x = egcd(b % a, a)
+        return (g, x - (b // a) * y, y)
+
+def modinv(a, m):
+    g, x, y = egcd(a, m)
+    if g != 1:
+        raise Exception('modular inverse does not exist')
+    else:
+        return x % m
+
+def factor(x):
+    res = Counter()
+    i = 2
+    while i * i <= x:
+        if x % i == 0:
+            while x % i == 0:
+                res[i] += 1
+                x /= i
+        i += 1
+    if x != 1:
+        res[x] += 1
+    return res
+
+def value(poly, a):
+    res = 0
+    for x in poly:
+        res = res * a + x
+    return res
+
+z = 40904447
+
+def G(a, b):
+    f = factor(a) + factor(27 * b**2 + a**6)
+    #
+    # for k, v in f.iteritems():
+    #     print k, v
+
+    answers = [0]
+    mod = 1
+
+    p1 = [1, 3 * a, 3 * a * a, a**3 + b]
+    p2 = [1, 0, 0, b]
+
+    pd1 = [3, 6 * a, 3 * a * a]
+    pd2 = [3, 0, 0]
+
+    for p in f:
+        g = gf_gcd(p1, p2, p, ZZ)
+
+        roots = []
+        if len(g) == 2:
+            roots = [(p-g[1]) % p]
+        else:
+            for i in xrange(p):
+                if gf_eval(g, i, p, ZZ) == 0:
+                    roots.append(i)
+
+        if roots:
+            e = 1
+            while True:
+                nroots = []
+                for root in roots:
+                    u1 = value(p1, root) // p**e % p
+                    v1 = value(pd1, root) % p
+
+                    u2 = value(p2, root) // p**e % p
+                    v2 = value(pd2, root) % p
+
+                    if v1 != 0 or v2 != 0:
+                        if v1 != 0:
+                            t = modinv(v1, p) * (p - u1) % p
+                        else:
+                            t = modinv(v2, p) * (p - u2) % p
+                        if (v1 * t + u1) % p == 0 and (v2 * t + u2) % p == 0:
+                            nroots.append(t * p**e + root)
+                    else:
+                        if u1 == 0 and u2 == 0:
+                            for i in xrange(p):
+                                nroots.append(i * p**e + root)
+                if nroots:
+                    roots = nroots
+                    e += 1
+                else:
+                    break
+            nans = []
+            for r1 in roots:
+                for r2 in answers:
+                    x = gf_crt([r1, r2], [p**e, mod], ZZ)
+                    nans.append(x)
+            answers = nans
+            mod *= p**e
+        else:
+            e = 0
+
+        # print p, f[p], e, roots, z % p**e
+
+    # print answers
+    return min(answers)
+
+
+def H(n, m):
+    res = 0
+    for a in xrange(1, n + 1):
+        print a
+        for b in xrange(1, m + 1):
+            res += G(a, b)
+    return res
+
+print H(18, 1900)
