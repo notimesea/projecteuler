@@ -1,0 +1,216 @@
+#include <bits/stdc++.h>
+
+#define clr(x) memset((x), 0, sizeof(x))
+#define all(x) (x).begin(), (x).end()
+#define pb push_back
+#define mp make_pair
+#define in(x) int (x); input((x));
+#define x first
+#define y second
+typedef int itn;
+
+#define next next12345
+#define prev prev12345
+#define left lefdsf232
+#define right rig43783
+#define x1 x12345
+#define y1 y12345
+
+using namespace std;
+
+template<typename T>
+T gcd(T x, T y) {
+    while (y > 0) {
+        x %= y;
+        swap(x, y);
+    }
+    return x;
+}
+
+template<class _T>
+inline _T sqr(const _T &x) {
+    return x * x;
+}
+
+template<class _T>
+inline string tostr(const _T &a) {
+    ostringstream os("");
+    os << a;
+    return os.str();
+}
+
+typedef long double ld;
+typedef long long ll;
+typedef unsigned long long ull;
+typedef pair<int, int> PII;
+const ld PI = 3.1415926535897932384626433832795L;
+
+template<typename T>
+inline void input(T &a) {
+    static int ed;
+    a = 0;
+    while (!isdigit(ed = getchar()) && ed != '-') { }
+    char neg = 0;
+    if (ed == '-') {
+        neg = 1;
+        ed = getchar();
+    }
+    while (isdigit(ed)) {
+        a = 10 * a + ed - '0';
+        ed = getchar();
+    }
+    if (neg) a = -a;
+}
+
+template<typename T = int>
+inline T nxt() {
+    T res;
+    input(res);
+    return res;
+}
+
+mt19937 generator;
+
+bool check(int v) {
+    for (int i = 2; i * i <= v; ++i) {
+        if (v % i == 0) {
+            return false;
+        }
+    }
+    return true;
+}
+
+long long pw(long long a, long long n, long long m) {
+    ll res = 1;
+    while (n) {
+        if (n & 1ll) {
+            res = res * a % m;
+        }
+        a = a * a % m;
+        n >>= 1;
+    }
+    return res;
+}
+
+template <class T>
+T lcm(T a, T b) {
+    return a / gcd(a, b) * b;
+}
+
+const int N = 110000000;
+
+int lp[N];
+vector <int> primes;
+
+long long n;
+
+long long ans;
+
+long long gcd (long long a, long long b, long long &x, long long &y) {
+    if (a == 0) {
+        x = 0; y = 1;
+        return b;
+    }
+    long long x1, y1;
+    long long d = gcd (b%a, a, x1, y1);
+    x = y1 - (b / a) * x1;
+    y = x1;
+    return d;
+}
+
+int ok[N];
+int ph[N];
+
+int main() {
+    //#define int long
+#ifdef LOCAL
+    freopen("input.txt", "r", stdin);
+    //freopen("output.txt", "w", stdout);
+#else
+    #define fname "parts"
+    //freopen(fname".in", "r", stdin);
+    //freopen(fname".out", "w", stdout);
+#endif
+    for (int i = 2; i < N; ++i) {
+        if (!lp[i]) {
+            for (int j = i; j < N; j += i) {
+                lp[j] = i;
+            }
+        }
+    }
+
+
+//    reverse(all(primes));
+
+    n = 1000ll * 1000ll * 1000ll * 1000ll;
+
+
+    for (int i = 1; i < N; ++i) {
+        if (i % 1000000 == 0) cerr << i << endl;
+        int x = i;
+        char o = true;
+        int phi = 1;
+        while (x > 1) {
+            int l = lp[x];
+            x /= l;
+            if (lp[x] == l) {
+                o = false;
+                break;
+            }
+            phi = lcm(phi, l - 1);
+        }
+        ok[i] = o;
+        ph[i] = phi;
+    }
+
+    set <long long> answers;
+
+    for (int i = 1; i < N; ++i) {
+        if (!ok[i]) {
+            continue;
+        }
+        long long x, y;
+        long long c = gcd(i, ph[i], x, y);
+        if (c == 1 || c == 3) {
+            int t, r;
+            if (c == 1) {
+                r = -3 * (int)x % ph[i];
+                if (r < 0) {
+                    r += ph[i];
+                }
+                t = ph[i];
+            } else {
+                r = -1 * (int)x % (ph[i] / 3);
+                if (r < 0) {
+                    r += ph[i] / 3;
+                }
+                t = ph[i] / 3;
+            }
+            for (int v = r; v < N && 1ll * v * i <= n; v += t) {
+                if (ok[v]) {
+                    if (gcd(v, i) != 1) continue;
+                    long long lc = lcm(1ll * ph[i], 1ll * ph[v]);
+                    long long res = 1ll * i * v;
+                    if (res <= n && (res + 3) % lc == 0 && !answers.count(res)) {
+                        cerr << i << " " << v << endl;
+                        answers.insert(res);
+                    }
+                }
+            }
+        }
+    }
+    cerr << answers.size() << "\n";
+    ans = accumulate(all(answers), 0ll);
+    cerr << setprecision(0) << fixed;
+    cerr << accumulate(all(answers), 0.0L) << "\n";
+    cout << ans << "\n";
+//
+//    rec(0);
+//    cout << ans << "\n";
+
+
+#ifdef LOCAL
+    cerr << "Time elapsed: " << 1.0 * clock() / CLOCKS_PER_SEC * 1000 << " ms." << endl;
+#endif
+    return 0;
+}
