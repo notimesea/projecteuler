@@ -1,0 +1,52 @@
+from collections import Counter
+from sortedcontainers import SortedList
+from itertools import combinations
+
+def gcd(a, b):
+    while b:
+        a, b = b, a % b
+    return a
+
+def bitcount(n):
+    return bin(n).count("1")
+
+def u(n):
+    return (2**bitcount(3*n))+(3**bitcount(2*n))+bitcount(n+1)
+
+def square(a, b, c, d):
+    t = a+b+c+d
+    return (t - 2 * a) * (t - 2 * b) * (t - 2 * c) * (t - 2 * d)
+
+n = 3000000
+
+# help(SortedSet)
+
+q = SortedList()
+q.add(u(1))
+q.add(u(2))
+q.add(u(3))
+
+answer = 0
+
+magic = 50
+
+for i in xrange(4, n + 1):
+    q.add(u(i))
+    while len(q) > magic:
+        q.pop(0)
+    print i, u(i)
+    bests = 0
+    bestp = 0
+    arr = list(q)
+    for i in xrange(len(arr) - 3):
+        a, b, c, d = arr[i], arr[i + 1], arr[i + 2], arr[i + 3]
+    # for a, b, c, d in combinations(q[-30:], 4):
+        s = square(a, b, c, d)
+        if s > bests or (s == bests and a+b+c+d > bestp):
+            bests = s
+            bestp = a+b+c+d
+    # print i, bestp
+    answer += bestp
+
+print(answer)
+
