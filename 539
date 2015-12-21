@@ -1,0 +1,50 @@
+def s(x, phase):
+    if x < 2:
+        return x
+    if phase == 0:
+        return 2 * s(x / 2, 1)
+    else:
+        return 2 * s(x / 2, 0) - 1 + x % 2
+
+def solve(a, len, phase):
+    if len == 0:
+        return s(a, phase)
+    if phase == 0:
+        return 4 * solve(a, len - 1, 1)
+    else:
+        return 4 * solve(a, len - 1, 0) - 2**(len - 1)
+
+def solve2(len):
+    res = 0
+    for i in xrange(len):
+        res += solve(1, i, 0)
+    return res
+
+def asolve(t):
+    bits = bin(t)[2:]
+
+    ans = 0
+
+    ans += solve2(len(bits) - 1)
+
+    cur = 1
+    for i in xrange(1, len(bits)):
+        bit = ord(bits[i]) - ord('0')
+
+        for j in xrange(bit):
+            ans += solve(cur * 2 + j, len(bits) - i - 1, 0)
+
+        cur = cur * 2 + bit
+
+    return ans
+
+def bsolve(t):
+    ans = 0
+    for i in xrange(1, t):
+        ans += s(i, 0)
+    return ans
+
+t = 10**18+1
+print asolve(t)
+print asolve(t) % 987654321
+# print bsolve(t)
