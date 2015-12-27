@@ -1,0 +1,198 @@
+#include <bits/stdc++.h>
+
+#define clr(x) memset((x), 0, sizeof(x))
+#define all(x) (x).begin(), (x).end()
+#define pb push_back
+#define mp make_pair
+#define in(x) int (x); input((x));
+#define x first
+#define y second
+typedef int itn;
+
+#define next next12345
+#define prev prev12345
+#define left lefdsf232
+#define right rig43783
+#define x1 x12345
+#define y1 y12345
+
+using namespace std;
+
+template<typename T>
+T gcd(T x, T y) {
+    while (y > 0) {
+        x %= y;
+        swap(x, y);
+    }
+    return x;
+}
+
+template <class T>
+T lcm(T a, T b) {
+    return a / gcd(a, b) * b;
+}
+
+
+template<class _T>
+inline _T sqr(const _T &x) {
+    return x * x;
+}
+
+template<class _T>
+inline string tostr(const _T &a) {
+    ostringstream os("");
+    os << a;
+    return os.str();
+}
+
+typedef long double ld;
+typedef long long ll;
+typedef unsigned long long ull;
+typedef pair<int, int> PII;
+const ld PI = 3.1415926535897932384626433832795L;
+
+template<typename T>
+inline void input(T &a) {
+    static int ed;
+    a = 0;
+    while (!isdigit(ed = getchar()) && ed != '-') { }
+    char neg = 0;
+    if (ed == '-') {
+        neg = 1;
+        ed = getchar();
+    }
+    while (isdigit(ed)) {
+        a = 10 * a + ed - '0';
+        ed = getchar();
+    }
+    if (neg) a = -a;
+}
+
+template<typename T = int>
+inline T nxt() {
+    T res;
+    input(res);
+    return res;
+}
+
+mt19937 generator;
+
+bool check(int v) {
+    if (v < 2) return false;
+    for (int i = 2; i * i <= v; ++i) {
+        if (v % i == 0) {
+            return false;
+        }
+    }
+    return true;
+}
+
+long long pw(long long a, long long n, long long m) {
+    ll res = 1;
+    while (n) {
+        if (n & 1ll) {
+            res = res * a % m;
+        }
+        a = a * a % m;
+        n >>= 1;
+    }
+    return res;
+}
+
+const int N = 120000000 + 1;
+
+int lp[N];
+
+long long mod = 1000000007;
+
+const int K = 50;
+
+int primes[K];
+
+//counts number of relatively primes number upto n to d
+long long f(long long n, int d) {
+    int sz = 0;
+    while (d > 1) {
+        int l = lp[d];
+        while (lp[d] == l) {
+            d /= l;
+        }
+        primes[sz++] = l;
+    }
+
+    long long res = 0;
+
+    for (int mask = 0; mask < (1 << sz); ++mask) {
+        int mu = 1;
+        int prod = 1;
+
+        for (int i = 0; i < sz; ++i) {
+            if (mask & (1 << i)) {
+                prod *= primes[i];
+                mu *= -1;
+            }
+        }
+        res += mu * (n / prod);
+    }
+    return res;
+}
+
+void test() {
+    for (int i = 1; i <= 100; i += 2) {
+        int r = 0;
+        for (int j = 2; j < i; j += 2) {
+            r += gcd(i, j) == 1;
+        }
+//        cerr << i << " " << r << " " << f(i, i) << " " << f(i, 2 * i) << endl;
+//        assert(r == f(i, i)- f(i, 2 * i));
+    }
+}
+
+int main() {
+    //#define int long
+#ifdef LOCAL
+    //freopen("input.txt", "r", stdin);
+    //freopen("output.txt", "w", stdout);
+#else
+    #define fname "ticket-office"
+    //freopen(fname".in", "r", stdin);
+    //freopen(fname".out", "w", stdout);
+#endif
+
+    for (int i = 2; i < N; ++i) {
+        if (!lp[i]) {
+            for (int j = i; j < N; j += i) {
+                lp[j] = i;
+            }
+        }
+    }
+
+//    test();
+//
+//    return 0;
+
+    long long r = 3141592653589793ll;
+
+    long long ans = 0;
+    int x = sqrt(r) + 100;
+    for (int i = 2; 1ll * i * i < r; ++i) {
+        while (1ll * i * i + 1ll * x * x > r) {
+            --x;
+        }
+        if (i % 100000 == 0) {
+            cerr << i << endl;
+        }
+        if (i % 2 == 0) {
+            ans += f(min(i, x), i);
+        } else {
+            ans += f(min(i, x), i) - f(min(i, x), 2 * i);
+        }
+    }
+
+    cout << ans << endl;
+
+#ifdef LOCAL
+    cerr << "Time elapsed: " << 1.0 * clock() / CLOCKS_PER_SEC * 1000 << " ms." << endl;
+#endif
+    return 0;
+}
