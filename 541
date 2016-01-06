@@ -1,0 +1,53 @@
+from gmpy2 import invert
+
+p = 137
+
+s_mem = dict()
+
+def H_star(n, deg):
+    pd = p ** deg
+    n = n % pd
+    if (n, deg) in s_mem:
+        return s_mem[(n, deg)]
+    result = 0
+    for i in xrange(1, n + 1):
+        if i % p != 0:
+            result += invert(i, pd)
+    result %= pd
+    s_mem[(n, deg)] = result
+    return result
+
+mem = dict()
+
+def H(n, deg):
+    if n == 0:
+        return 0
+    if (n, deg) in mem:
+        return mem[(n, deg)]
+
+    res = (H_star(n, deg) + H(n / p, deg + 1) / p) % (p ** deg)
+    mem[(n, deg)] = res
+    return res
+
+def psi(n):
+    return H(n, 2) / p
+
+J = [0]
+
+allJ = [0]
+
+while True:
+    nJ = []
+    for t in J:
+        for i in xrange(p):
+            if (H(i, 1) + psi(t)) % p == 0:
+                if t != 0 or i != 0:
+                    nJ.append(p * t + i)
+    J = nJ
+    if not J:
+        break
+    allJ.extend(J)
+
+print allJ
+print allJ[-1] * p + p - 1
+
