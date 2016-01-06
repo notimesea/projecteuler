@@ -4,9 +4,10 @@ p = 137
 
 s_mem = dict()
 
+
 def H_star(n, deg):
     pd = p ** deg
-    n = n % pd
+    n %= pd
     if (n, deg) in s_mem:
         return s_mem[(n, deg)]
     result = 0
@@ -17,7 +18,9 @@ def H_star(n, deg):
     s_mem[(n, deg)] = result
     return result
 
+
 mem = dict()
+
 
 def H(n, deg):
     if n == 0:
@@ -29,8 +32,10 @@ def H(n, deg):
     mem[(n, deg)] = res
     return res
 
+
 def psi(n):
     return H(n, 2) / p
+
 
 J = [0]
 
@@ -43,6 +48,7 @@ while True:
             if (H(i, 1) + psi(t)) % p == 0:
                 if t != 0 or i != 0:
                     nJ.append(p * t + i)
+    print nJ
     J = nJ
     if not J:
         break
@@ -50,4 +56,3 @@ while True:
 
 print allJ
 print allJ[-1] * p + p - 1
-
