@@ -1,0 +1,86 @@
+from sympy.ntheory import divisors, factorint
+
+def alpha(y, k):
+    return y ** (k + 1) - (y - 1) ** (k + 1)
+
+def beta(y, k):
+    return y ** k
+
+n = 10 ** 17
+
+cands = []
+
+d = 2
+while 2 ** d <= n:
+    r = 2
+    e = 1
+    while r ** d <= n and r <= 200:
+        v = r ** d
+        while (e + 1) ** (d + 1) <= v:
+            e += 1
+        cands.append((r, d))
+        r += 1
+    d += 1
+
+print len(cands)
+
+mem = {}
+
+def f(z):
+    if z in mem:
+        return mem[z]
+    ans = 0
+    if z > 4:
+        ans = f(z - 1)
+    prv = ans
+    bd = -1
+    bp = -1
+    for d in divisors(z):
+        if d == 1:
+            continue
+        p = 0
+        q = z
+        while q % d == 0:
+            p += 1
+            q /= d
+        if p == 1:
+            continue
+        if q * alpha(d, p) > ans:
+            ans = q * alpha(d, p)
+            bd = d
+            bp = p
+
+    if bd != -1:
+        big[bp] = bd
+    # if ans > prv:
+    #     print "UPDATED", n
+    mem[z] = ans
+    return ans
+
+k = 4
+s = 7
+
+while k <= n:
+    print k, s
+    next_k = n + 1
+    next_s = -1
+    for y, d in cands:
+        need_x = s / alpha(y, d) + 1
+        nk = need_x * beta(y, d)
+        ns = need_x * alpha(y, d)
+        if nk < next_k:
+            next_k = nk
+            next_s = ns
+        elif nk == next_k and ns > next_s:
+            next_s = ns
+
+    if (next_k - k) % 2 == 1:
+        if k % 2 == 0:
+            ans += s
+        else:
+            ans -= s
+    s = next_s
+    k = next_k
+
+print ans
+
