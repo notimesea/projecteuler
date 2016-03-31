@@ -1,0 +1,251 @@
+#include <bits/stdc++.h>
+
+#define clr(x) memset((x), 0, sizeof(x))
+#define all(x) (x).begin(), (x).end()
+#define pb push_back
+#define mp make_pair
+#define in(x) int (x); input((x));
+#define x first
+#define y second
+typedef int itn;
+
+//#define next next12345
+//#define prev prev12345
+#define left lefdsf232
+#define right rig43783
+#define x1 x12345
+#define y1 y12345
+
+using namespace std;
+
+template<typename T>
+T gcd(T x, T y) {
+    while (y > 0) {
+        x %= y;
+        swap(x, y);
+    }
+    return x;
+}
+
+template<class T>
+T lcm(T a, T b) {
+    return a / gcd(a, b) * b;
+}
+
+
+template<class _T>
+inline _T sqr(const _T &x) {
+    return x * x;
+}
+
+template<class _T>
+inline string tostr(const _T &a) {
+    ostringstream os("");
+    os << a;
+    return os.str();
+}
+
+typedef long double ld;
+typedef long long ll;
+typedef unsigned long long ull;
+typedef pair<int, int> PII;
+const ld PI = 3.1415926535897932384626433832795L;
+
+template<typename T>
+inline void input(T &a) {
+    static int ed;
+    a = 0;
+    while (!isdigit(ed = getchar()) && ed != '-') { }
+    char neg = 0;
+    if (ed == '-') {
+        neg = 1;
+        ed = getchar();
+    }
+    while (isdigit(ed)) {
+        a = 10 * a + ed - '0';
+        ed = getchar();
+    }
+    if (neg) a = -a;
+}
+
+template<typename T = int>
+inline T nxt() {
+    T res;
+    input(res);
+    return res;
+}
+
+void myassert(bool v) {
+    assert(v);
+    //cout << "FAIL\n";
+    //exit(0);
+}
+
+mt19937 generator;
+
+bool check(int v) {
+    if (v < 2) return false;
+    for (int i = 2; i * i <= v; ++i) {
+        if (v % i == 0) {
+            return false;
+        }
+    }
+    return true;
+}
+
+long long pw(long long a, long long n, long long m) {
+    ll res = 1;
+    while (n) {
+        if (n & 1ll) {
+            res = res * a % m;
+        }
+        a = a * a % m;
+        n >>= 1;
+    }
+    return res;
+}
+
+void rec(int n) {
+    vector <int> masks;
+
+    for (int mask = 1; mask < (1 << n); ++mask) {
+        masks.push_back(mask);
+    }
+    int res = 0;
+    for (int mask = 1; mask < (1 << masks.size()); ++mask) {
+        vector <int> take;
+        for (int j = 0; j < masks.size(); ++j) {
+            if (mask & (1 << j)) {
+                take.pb(j);
+            }
+        }
+//        int ok[n];
+//        clr(ok);
+//        for (int v : take) {
+//            for (int j = 0; j < n; ++j) {
+//                if (masks[v] & (1 << j)) {
+//                    ok[j] = 1;
+//                }
+//            }
+//        }
+//        res += accumulate(ok, ok + n, 0) == n;
+//        continue;
+        queue <int> q;
+        q.push(0);
+
+        int used[take.size()];
+        clr(used);
+        used[0] = 1;
+
+        while (!q.empty()) {
+            int v = q.front();
+            q.pop();
+            for (int i = 0; i < take.size(); ++i) {
+                if (masks[take[v]] & masks[take[i]]) {
+                    if (!used[i]) {
+                        used[i] = 1;
+                        q.push(i);
+                    }
+                }
+            }
+        }
+        res += accumulate(used, used + take.size(), 0) == take.size();
+    }
+
+    cerr << "TRUE " << res << "\n";
+}
+
+
+void solve(int test) {
+    int mod = 1000000007;
+    nmod_poly_t G;
+    nmod_poly_init(G, mod);
+
+    const int N = 10000;
+//    rec(N);
+    const int K = 10;
+
+    int coef[N + 1];
+    clr(coef);
+
+    long long f = 1;
+
+    coef[0] = 1;
+
+    for (int i = 1; i <= N; ++i) {
+        f = f * pw(i, mod - 2, mod) % mod;
+        long long q = (pw(2, i, mod - 1) + mod - 2) % (mod - 1);
+        q = pw(2, q, mod);
+        nmod_poly_set_coeff_ui(G, i, (q + mod - 1) * f % mod);
+    }
+
+    nmod_poly_t e;
+    nmod_poly_init(e, mod);
+
+    nmod_poly_t x;
+    nmod_poly_init(x, mod);
+    nmod_poly_set_coeff_ui(x, 1, 1);
+
+    nmod_poly_exp_series(e, x, N + 1);
+
+    nmod_poly_t H; // G(x) / exp(x)
+    nmod_poly_init(H, mod);
+
+    nmod_poly_div_series(H, G, e, N + 1);
+
+    nmod_poly_t L; // log(1 + H)
+    nmod_poly_init(L, mod);
+
+    nmod_poly_set_coeff_ui(H, 0, 1);
+    nmod_poly_log_series(L, H, N + 1);
+
+    nmod_poly_t V; // L ^ k
+    nmod_poly_init(V, mod);
+
+    nmod_poly_pow_trunc_binexp(V, L, K, N + 1);
+
+    nmod_poly_t R; // V * exp(x)
+    nmod_poly_init(R, mod);
+
+    nmod_poly_mul(R, V, e);
+
+    long long ans = nmod_poly_get_coeff_ui(R, N);
+    for (int i = 1; i <= N; ++i) {
+        ans = ans * i % mod;
+    }
+    for (int i = 1; i <= K; ++i) {
+        ans = ans * pw(i, mod - 2, mod) % mod;
+    }
+    cout << ans << endl;
+}
+
+
+int main(int argc, char ** argv) {
+
+#ifdef LOCAL
+    freopen("input.txt", "r", stdin);
+    //freopen("output.txt", "w", stdout);
+#else
+    #define fname "sequence"
+    freopen(fname".in", "r", stdin);
+    freopen(fname".out", "w", stdout);
+#endif
+#ifdef LOCAL
+
+    int t = 1;
+#else
+    int t = nxt();
+#endif
+    int c = 0;
+    while (t--) {
+        solve(++c);
+    }
+
+
+
+
+#ifdef LOCAL
+    cerr << "Time elapsed: " << 1.0 * clock() / CLOCKS_PER_SEC * 1000 << " ms." << endl;
+#endif
+    return 0;
+}
