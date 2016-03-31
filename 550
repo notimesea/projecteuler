@@ -1,0 +1,266 @@
+#include <bits/stdc++.h>
+
+#define clr(x) memset((x), 0, sizeof(x))
+#define all(x) (x).begin(), (x).end()
+#define pb push_back
+#define mp make_pair
+#define in(x) int (x); input((x));
+#define x first
+#define y second
+typedef int itn;
+
+//#define next next12345
+//#define prev prev12345
+#define left lefdsf232
+#define right rig43783
+#define x1 x12345
+#define y1 y12345
+
+using namespace std;
+
+template<typename T>
+T gcd(T x, T y) {
+    while (y > 0) {
+        x %= y;
+        swap(x, y);
+    }
+    return x;
+}
+
+template<class T>
+T lcm(T a, T b) {
+    return a / gcd(a, b) * b;
+}
+
+
+template<class _T>
+inline _T sqr(const _T &x) {
+    return x * x;
+}
+
+template<class _T>
+inline string tostr(const _T &a) {
+    ostringstream os("");
+    os << a;
+    return os.str();
+}
+
+typedef long double ld;
+typedef long long ll;
+typedef unsigned long long ull;
+typedef pair<int, int> PII;
+const ld PI = 3.1415926535897932384626433832795L;
+
+template<typename T>
+inline void input(T &a) {
+    static int ed;
+    a = 0;
+    while (!isdigit(ed = getchar()) && ed != '-') { }
+    char neg = 0;
+    if (ed == '-') {
+        neg = 1;
+        ed = getchar();
+    }
+    while (isdigit(ed)) {
+        a = 10 * a + ed - '0';
+        ed = getchar();
+    }
+    if (neg) a = -a;
+}
+
+template<typename T = int>
+inline T nxt() {
+    T res;
+    input(res);
+    return res;
+}
+
+void myassert(bool v) {
+    assert(v);
+    //cout << "FAIL\n";
+    //exit(0);
+}
+
+mt19937 generator;
+
+bool check(int v) {
+    if (v < 2) return false;
+    for (int i = 2; i * i <= v; ++i) {
+        if (v % i == 0) {
+            return false;
+        }
+    }
+    return true;
+}
+
+long long pw(long long a, long long n, long long m) {
+    ll res = 1;
+    while (n) {
+        if (n & 1ll) {
+            res = res * a % m;
+        }
+        a = a * a % m;
+        n >>= 1;
+    }
+    return res;
+}
+
+long long inv(long long a, long long p) {
+    long long res = 1;
+    while (a > 1) {
+        res = res * (p - p / a) % p;
+        a = p % a;
+    }
+    return res;
+}
+
+const int N = 10000000 + 1;
+
+map <vector <int>, int> dp;
+
+int used[N];
+
+vector <vector <int> > splits;
+
+void rec(int pos, vector <int> &x, vector <int> cur) {
+    if (pos == x.size()) {
+        if (accumulate(all(cur), 0) == 0) {
+            return;
+        }
+        if (cur == x) {
+            return;
+        }
+        splits.pb(cur);
+        return;
+    }
+
+    for (int d = 0; d <= x[pos]; ++d) {
+        cur.pb(d);
+        rec(pos + 1, x, cur);
+        cur.pop_back();
+    }
+}
+int phase = 1;
+
+int solve(vector <int> x) {
+    sort(all(x), greater <int>());
+    while (!x.back()) {
+        x.pop_back();
+    }
+    if (dp.count(x)) {
+        return dp[x];
+    }
+    splits.clear();
+    rec(0, x, vector <int>());
+    auto my = splits;
+    vector <int> xx;
+    for (int i = 0; i < my.size(); ++i) {
+        for (int j = 0; j <= i; ++j) {
+            xx.push_back(solve(my[i]) ^ solve(my[j]));
+        }
+    }
+    ++phase;
+    for (int v : xx) {
+        used[v] = phase;
+    }
+    for (int i = 0; ; ++i) {
+        if (used[i] != phase) {
+            return dp[x] = i;
+        }
+    }
+}
+
+int lp[N];
+int value[N];
+int mx;
+
+long long mod = 987654321;
+
+struct poly {
+    long long v[64];
+
+    poly() {
+        clr(v);
+    }
+
+    poly operator*(const poly &r) const {
+        poly res;
+        for (int i = 0; i < 64; ++i) {
+            for (int j = 0; j < 64; ++j) {
+                res.v[i ^ j] += v[i] * r.v[j];
+                res.v[i ^ j] %= mod;
+            }
+        }
+        return res;
+    }
+};
+
+void solve(int test) {
+    poly q;
+    for (int i = 2; i < N; ++i) {
+        if (!lp[i]) {
+            for (int j = i; j < N; j += i) {
+                lp[j] = i;
+            }
+        }
+        int x = i;
+        vector <int> f;
+        while (x > 1) {
+            int l = lp[x];
+            int d = 0;
+            while (lp[x] == l) {
+                d += 1;
+                x /= l;
+            }
+            f.pb(d);
+        }
+        value[i] = solve(f);
+        q.v[value[i]] += 1;
+//        mx = max(mx, value[i]);
+    }
+    long long n = 1000000000000ll;
+
+    poly res;
+    res.v[0] = 1;
+
+    while (n) {
+        if (n & 1ll) {
+            res = res * q;
+        }
+        q = q * q;
+        n >>= 1;
+    }
+
+    long long ans = accumulate(res.v + 1, res.v + 64, 0ll) % mod;
+    cout << ans << "\n";
+}
+
+
+
+int main(int argc, char ** argv) {
+
+#ifdef LOCAL
+    freopen("input.txt", "r", stdin);
+    //freopen("output.txt", "w", stdout);
+#else
+    #define fname "sequence"
+    //freopen(fname".in", "r", stdin);
+    //freopen(fname".out", "w", stdout);
+#endif
+
+#ifdef LOCAL
+
+    int t = 1;
+#else
+    int t = 1;
+#endif
+    int c = 0;
+    while (t--) {
+        solve(++c);
+    }
+
+#ifdef LOCAL
+    cerr << "Time elapsed: " << 1.0 * clock() / CLOCKS_PER_SEC * 1000 << " ms." << endl;
+#endif
+    return 0;
+}
