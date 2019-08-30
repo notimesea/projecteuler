@@ -1,0 +1,182 @@
+package main
+
+import (
+	"bufio"
+	"flag"
+	"fmt"
+	"io"
+	"math/big"
+	"math/bits"
+	"os"
+)
+
+type key struct {
+	n uint64
+	delta int
+}
+
+type data struct {
+	count uint64
+	sum uint64
+}
+
+
+var cache map[key]data
+var k1, k2 uint
+
+const mod = 10000000000000000
+
+func solve(k key) data {
+	if v, ok := cache[k]; ok {
+		return v
+	}
+
+	if k.n == 0 {
+		if k.delta == 0 {
+			return data{1, 0}
+		} else {
+			return data{0, 0}
+		}
+	}
+
+	pos := uint(bits.Len64(k.n)) - 1
+	delta := (1 << (pos % k1)) - (1 << (pos % k2))
+
+	u := solve(key{k.n ^ (uint64(1) << pos), k.delta - delta})
+	v := solve(key{(1 << pos) - 1, k.delta})
+
+	uc := u.count
+	for i := uint(0); i < pos; i++ {
+		uc = uc * 2 % mod
+	}
+
+	u.sum += uc
+
+	u.count += v.count
+	u.sum += v.sum
+
+	u.sum %= mod
+
+	cache[k] = u
+
+	return u
+}
+
+func main() {
+	defer writer.Flush()
+
+	answer := uint64(0)
+	for k1 = 3; k1 <= 6; k1++ {
+		for k2 = 1; k2 <= k1 - 2; k2++ {
+			cache = make(map[key]data)
+
+			z := solve(key{10000000000000000, 0})
+			answer += z.sum
+			answer %= mod
+		}
+	}
+
+	println(answer)
+
+}
+
+var reader *bufio.Reader
+var writer *bufio.Writer
+
+var inputFile = flag.String("input", "", "")
+
+func init() {
+	flag.Parse()
+	var i io.Reader
+	if *inputFile != "" {
+		i, _ = os.Open(*inputFile)
+	} else {
+		i = os.Stdin
+	}
+	reader = bufio.NewReaderSize(i, 1<<20)
+	writer = bufio.NewWriterSize(os.Stdout, 1<<20)
+}
+
+func println(a ...interface{}) {
+	_, _ = fmt.Fprintln(writer, a...)
+}
+
+func printf(format string, a ...interface{}) {
+	_, _ = fmt.Fprintf(writer, format, a...)
+}
+
+func scanf(format string, a ...interface{}) {
+	_, _ = fmt.Fscanf(reader, format, a...)
+}
+
+func scan(a interface{}) {
+	_, _ = fmt.Fscan(reader, a)
+}
+
+func NextInt64() int64 {
+	var res int64
+	scan(&res)
+	return res
+}
+
+func NextInt() int {
+	var res int
+	scan(&res)
+	return res
+}
+
+func NextIntArray(n int) []int {
+	res := make([]int, n)
+	for i := range res {
+		scan(&res[i])
+	}
+	return res
+}
+
+func NextInt64Array(n int) []int64 {
+	res := make([]int64, n)
+	for i := range res {
+		scan(&res[i])
+	}
+	return res
+}
+
+func NextString() string {
+	var res string
+	scan(&res)
+	return res
+}
+
+func NextBigInt() *big.Int {
+	n := new(big.Int)
+	n, _ = n.SetString(NextString(), 10)
+	return n
+}
+
+func AbsInt64(x int64) int64 {
+	if x < 0 {
+		return -x
+	}
+	return x
+}
+
+func MinInt64(x, y int64) int64 {
+	if x < y {
+		return x
+	}
+	return y
+}
+
+func MaxInt64(x, y int64) int64 {
+	if x > y {
+		return x
+	}
+	return y
+}
+
+func MaxInt(x, y int) int {
+	if x > y {
+		return x
+	}
+	return y
+}
