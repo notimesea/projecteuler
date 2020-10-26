@@ -1,0 +1,53 @@
+seqs = []
+def generate(s, last):
+    if len(s) > 1 and sum(s) == 2 * s[-1]:
+        seqs.append(s)
+    
+    if sum(s) > 9:
+        return
+    
+    for i in range(last, 10):
+        generate(s + (i,), i)
+
+generate((), 1)
+
+cache = {}
+
+mod = 10 ** 16
+
+def calc(a, n):
+    if (a, n) in cache:
+        return cache[(a, n)]
+    
+    if n == 0:
+        if len(a) == 0:
+            return (0, 1)
+        else:
+            return (0, 0)
+    
+    s, c = calc(a, n - 1)
+    s = (s * 10) % mod
+    
+    for pos, val in enumerate(a):
+        if pos == 0 or a[pos] != a[pos - 1]:
+            na = a[:pos] + a[pos+1:]
+            sa, ca = calc(na, n-1)
+            sa = (sa * 10 + ca * a[pos]) % mod
+            s = (s + sa) % mod
+            c = (c + ca) % mod
+    
+    cache[(a, n)] = (s, c)
+    return (s, c)
+
+N = 2020
+
+for n in range(N + 1):
+    for a in seqs:
+        calc(a, n)
+
+answer = 0
+for a in seqs:
+    s, _ = calc(a, N)
+    answer = (answer + s) % mod
+
+print(answer)
